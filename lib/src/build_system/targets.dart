@@ -577,9 +577,8 @@ String _normalizePluginName(String name) => name.replaceAll('-', '_');
 String _pluginLibraryName(String name) =>
     'lib${_normalizePluginName(name)}_plugin.so';
 
-const String _flutterLinuxGtkLibraryName = 'libflutter_linux_gtk.so';
-const String _flutterLinuxGtkShimLibraryName =
-  'libflutter_linux_gtk_shim.so';
+const String _flutterLinuxGtkShimInputName = 'libflutter_linux_gtk.so';
+const String _flutterLinuxGtkShimOutputName = 'libflutter_linux_gtk.so';
 const String _runBundleScriptName = 'run_bundle.sh';
 const String _runBundleScriptContent = r'''#!/usr/bin/env bash
 set -euo pipefail
@@ -600,7 +599,8 @@ if [[ ! -x "$flutterpi" ]]; then
   exit 1
 fi
 
-export LD_LIBRARY_PATH="$bundle_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+plugins_dir="$bundle_dir/plugins"
+export LD_LIBRARY_PATH="$bundle_dir:$plugins_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 exec "$flutterpi" "$@" "$bundle_dir"
 ''';
 
@@ -778,26 +778,29 @@ File? _findPluginLibrary(
 }
 
 File? _findFlutterLinuxGtkLibrary(ExtendedEnvironment environment) {
-  final buildDir = environment.projectDir.childDirectory('build');
-  final targetTokens =
-      _targetPathTokens(environment.defines['flutterpi-target']);
-  final candidates = <Directory>[
-    buildDir.childDirectory('linux'),
-    buildDir,
-  ];
-
-  for (final dir in candidates) {
-    final match = _findFirstFileNamed(
-      dir,
-      _flutterLinuxGtkLibraryName,
-      preferredPathTokens: targetTokens,
-    );
-    if (match != null) {
-      return match;
-    }
+  final artifacts = environment.artifacts;
+  if (artifacts is! FlutterpiArtifacts) {
+    return null;
   }
 
-  return null;
+  final targetShortName = environment.defines['flutterpi-target'];
+  if (targetShortName == null) {
+    return null;
+  }
+
+  final target = FlutterpiTargetPlatform.values
+      .firstWhere((platform) => platform.shortName == targetShortName);
+
+  final buildModeName = environment.defines[kBuildMode];
+  if (buildModeName == null) {
+    return null;
+  }
+
+  final buildMode = BuildMode.fromCliName(buildModeName);
+
+  return artifacts.getFlutterpiArtifact(
+    FlutterpiGtkShim(target: target, mode: buildMode),
+  );
 }
 
 class FlutterpiPluginBundle extends Target {
@@ -865,16 +868,13 @@ class FlutterpiPluginBundle extends Target {
     final flutterGtkLib = _findFlutterLinuxGtkLibrary(environment);
     if (flutterGtkLib == null) {
       environment.logger.printTrace(
-        'Could not find $_flutterLinuxGtkLibraryName in build outputs. '
+        'Could not find $_flutterLinuxGtkShimInputName in flutter-pi cache. '
         'Skipping bundling GTK shim library.',
       );
     } else {
       final gtkOutputFile =
-          outputDir.childFile(_flutterLinuxGtkLibraryName);
+          outputDir.childFile(_flutterLinuxGtkShimOutputName);
       flutterGtkLib.copySync(gtkOutputFile.path);
-      final gtkShimOutputFile =
-          outputDir.childFile(_flutterLinuxGtkShimLibraryName);
-      flutterGtkLib.copySync(gtkShimOutputFile.path);
     }
 
     // flutter_plugins.json is intentionally not generated.

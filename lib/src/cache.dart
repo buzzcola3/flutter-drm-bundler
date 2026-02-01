@@ -271,7 +271,21 @@ class FlutterpiBinaries extends ArtifactSet {
           ),
     ];
 
-    for (final (assetName, subdirs) in artifacts) {
+    final shimArtifacts = [
+      for (final triple in [
+        'aarch64-linux-gnu',
+        'arm-linux-gnueabihf',
+        'x86_64-linux-gnu',
+        'riscv64-linux-gnu',
+      ])
+        for (final type in ['release', 'debug'])
+          (
+            'flutterpi-gtk-shim-$triple-$type.tar.xz',
+            ['gtk-shim', triple, type],
+          ),
+    ];
+
+    for (final (assetName, subdirs) in [...artifacts, ...shimArtifacts]) {
       final asset = release.findAsset(assetName);
 
       final url = Uri.parse(

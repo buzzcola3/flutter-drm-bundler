@@ -43,6 +43,13 @@ final class GenSnapshot extends FlutterpiArtifact {
   final BuildMode mode;
 }
 
+final class FlutterpiGtkShim extends FlutterpiArtifact {
+  const FlutterpiGtkShim({required this.target, required this.mode});
+
+  final FlutterpiTargetPlatform target;
+  final BuildMode mode;
+}
+
 abstract class FlutterpiArtifacts implements Artifacts {
   File getFlutterpiArtifact(FlutterpiArtifact artifact);
 }
@@ -87,6 +94,20 @@ class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
             },
           )
           .childFile('flutter-pi'),
+      FlutterpiGtkShim(:final target, :final mode) => cache
+          .getArtifactDirectory('flutter-pi')
+          .childDirectory('gtk-shim')
+          .childDirectory(target.triple)
+          .childDirectory(
+            switch (mode) {
+              BuildMode.debug => 'debug',
+              BuildMode.profile ||
+              BuildMode.release ||
+              BuildMode.jitRelease =>
+                'release',
+            },
+          )
+          .childFile('libflutter_linux_gtk.so'),
       Engine(:final target, :final flavor) => cache
           .getArtifactDirectory('engine')
           .childDirectory('flutterpi-engine-$target-$flavor')
