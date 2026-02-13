@@ -382,7 +382,7 @@ class GithubWorkflowRunArtifact extends FlutterDrmEmbedderArtifact {
     this.availableEngineVersion,
     required super.cache,
     required this.artifactDescription,
-  })  : repo = repo ?? gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder'),
+  })  : repo = repo ?? gh.RepositorySlug('ardera', 'flutter-ci'),
         storageKey = _getStorageKeyForArtifact(artifactDescription),
         super(artifactDescription.cacheKey);
 
@@ -482,7 +482,7 @@ class GithubReleaseArtifact extends FlutterDrmEmbedderArtifact {
     required super.cache,
     required this.github,
     required this.artifactDescription,
-  })  : repo = repo ?? gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder'),
+  })  : repo = repo ?? gh.RepositorySlug('ardera', 'flutter-ci'),
         storageKey = getStorageKeyForArtifact(artifactDescription),
         super(artifactDescription.cacheKey);
 
@@ -695,6 +695,8 @@ mixin FlutterDrmBundlerCacheMixin on Cache implements FlutterDrmBundlerCache {
         storageBaseUrl,
         'https://github.com/buzzcola3/flutter-drm-embedder/',
         'https://api.github.com/repos/buzzcola3/flutter-drm-embedder/',
+        'https://github.com/ardera/flutter-ci/',
+        'https://api.github.com/repos/ardera/flutter-ci/',
       ];
 
   /// This has to be lazy because it requires FLUTTER_ROOT to be initialized.
@@ -831,7 +833,7 @@ class FlutterDrmBundlerCacheWithFlutterArtifacts extends FlutterCache
     required MyGithub github,
     gh.RepositorySlug? repo,
   }) {
-    repo ??= gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder');
+    repo ??= gh.RepositorySlug('ardera', 'flutter-ci');
 
     final cache = FlutterDrmBundlerCacheWithFlutterArtifacts.withoutEngineArtifacts(
       logger: logger,
@@ -871,7 +873,7 @@ class FlutterDrmBundlerCacheWithFlutterArtifacts extends FlutterCache
     required String runId,
     String? availableEngineVersion,
   }) {
-    repo ??= gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder');
+    repo ??= gh.RepositorySlug('ardera', 'flutter-ci');
 
     final cache = FlutterDrmBundlerCacheWithFlutterArtifacts.withoutEngineArtifacts(
       logger: logger,
