@@ -280,7 +280,7 @@ class FlutterDrmEmbedderBinaries extends ArtifactSet {
       ])
         for (final type in ['release', 'debug'])
           (
-            'flutter-drm-gtk-shim-$triple-$type.tar.xz',
+            'flutter-drm-embedder-gtk-shim-$triple-$type.tar.xz',
             ['gtk-shim', triple, type],
           ),
     ];
