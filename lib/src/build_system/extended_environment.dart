@@ -1,6 +1,6 @@
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:process/process.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
@@ -13,7 +13,7 @@ class ExtendedEnvironment implements Environment {
     required Directory flutterRootDir,
     required FileSystem fileSystem,
     required Logger logger,
-    required FlutterpiArtifacts artifacts,
+    required FlutterDrmEmbedderArtifacts artifacts,
     required ProcessManager processManager,
     required Platform platform,
     required Analytics analytics,
@@ -108,7 +108,7 @@ class ExtendedEnvironment implements Environment {
   Directory get rootBuildDir => _delegate.rootBuildDir;
 
   @override
-  final FlutterpiArtifacts artifacts;
+  final FlutterDrmEmbedderArtifacts artifacts;
 
   final MoreOperatingSystemUtils operatingSystemUtils;
 

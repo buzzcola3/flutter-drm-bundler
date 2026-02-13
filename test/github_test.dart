@@ -1,4 +1,4 @@
-import 'package:flutterpi_tool/src/github.dart';
+import 'package:flutter_drm_bundler/src/github.dart';
 import 'package:github/github.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
@@ -10,10 +10,10 @@ void main() {
   test('workflow artifacts querying', () async {
     final client = MockClient((request) async {
       final uri1 =
-          'https://api.github.com/repos/ardera/flutter-ci/actions/runs/10332084071/artifacts?page=1&per_page=100';
+          'https://api.github.com/repos/buzzcola3/flutter-drm-embedder/actions/runs/10332084071/artifacts?page=1&per_page=100';
 
       final uri2 =
-          'https://api.github.com/repos/ardera/flutter-ci/actions/runs/10332084071/artifacts?page=2&per_page=100';
+          'https://api.github.com/repos/buzzcola3/flutter-drm-embedder/actions/runs/10332084071/artifacts?page=2&per_page=100';
 
       expect(
         request.url.toString(),
@@ -46,7 +46,7 @@ void main() {
 
     final artifact = await github.getWorkflowRunArtifact(
       'universal',
-      repo: RepositorySlug('ardera', 'flutter-ci'),
+      repo: RepositorySlug('buzzcola3', 'flutter-drm-embedder'),
       runId: 10332084071,
     );
 
@@ -58,7 +58,7 @@ void main() {
     expect(artifact.archiveDownloadUrl, isNotNull);
     expect(
       artifact.archiveDownloadUrl.toString(),
-      'https://api.github.com/repos/ardera/flutter-ci/actions/artifacts/1797913057/zip',
+      'https://api.github.com/repos/buzzcola3/flutter-drm-embedder/actions/artifacts/1797913057/zip',
     );
   });
 }

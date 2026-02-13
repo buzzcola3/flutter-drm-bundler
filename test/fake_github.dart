@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutterpi_tool/src/github.dart';
+import 'package:flutter_drm_bundler/src/github.dart';
 import 'package:github/github.dart' as gh;
 import 'package:http/http.dart' as http;
 

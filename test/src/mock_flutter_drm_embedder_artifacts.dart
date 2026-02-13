@@ -2,10 +2,10 @@ import 'package:file/src/interface/file.dart';
 import 'package:file/src/interface/file_system_entity.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
 import 'package:test/test.dart';
 
-class MockFlutterpiArtifacts implements FlutterpiArtifacts {
+class MockFlutterDrmEmbedderArtifacts implements FlutterDrmEmbedderArtifacts {
   String Function(
     Artifact, {
     TargetPlatform? platform,
@@ -41,14 +41,14 @@ class MockFlutterpiArtifacts implements FlutterpiArtifacts {
     return getEngineTypeFn!(platform, mode);
   }
 
-  File Function(FlutterpiArtifact artifact)? getFlutterpiArtifactFn;
+  File Function(FlutterDrmEmbedderArtifact artifact)? getFlutterDrmEmbedderArtifactFn;
 
   @override
-  File getFlutterpiArtifact(FlutterpiArtifact artifact) {
-    if (getFlutterpiArtifactFn == null) {
-      fail("Expected getFlutterpiArtifact to not be called.");
+  File getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
+    if (getFlutterDrmEmbedderArtifactFn == null) {
+      fail("Expected getFlutterDrmEmbedderArtifact to not be called.");
     }
-    return getFlutterpiArtifactFn!(artifact);
+    return getFlutterDrmEmbedderArtifactFn!(artifact);
   }
 
   FileSystemEntity Function(HostArtifact artifact)? getHostArtifactFn;

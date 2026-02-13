@@ -3,17 +3,17 @@
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
-import 'package:flutterpi_tool/src/fltool/common.dart' as fltool;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fltool;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
 
-class RunCommand extends fltool.RunCommand with FlutterpiCommandMixin {
+class RunCommand extends fltool.RunCommand with FlutterDrmBundlerCommandMixin {
   RunCommand({bool verboseHelp = false}) {
     usesEngineFlavorOption();
     usesDebugSymbolsOption();
-    usesLocalFlutterpiExecutableArg(verboseHelp: verboseHelp);
+    usesLocalEmbedderExecutableArg(verboseHelp: verboseHelp);
   }
 
   @protected
@@ -44,11 +44,11 @@ class RunCommand extends fltool.RunCommand with FlutterpiCommandMixin {
   Future<fltool.FlutterCommandResult> runCommand() async {
     await populateCache();
 
-    var artifacts = globals.flutterpiArtifacts;
-    if (getLocalFlutterpiExecutable() case File file) {
-      artifacts = LocalFlutterpiBinaryOverride(
+    var artifacts = globals.flutterDrmEmbedderArtifacts;
+    if (getLocalEmbedderExecutable() case File file) {
+      artifacts = LocalFlutterDrmEmbedderBinaryOverride(
         inner: artifacts,
-        flutterpiBinary: file,
+        flutterDrmEmbedderBinary: file,
       );
     }
 

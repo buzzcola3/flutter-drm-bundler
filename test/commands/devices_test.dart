@@ -3,21 +3,21 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:file/src/interface/file_system.dart';
 
-import 'package:flutterpi_tool/src/cli/command_runner.dart' as src;
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/config.dart' as src;
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
-import 'package:flutterpi_tool/src/executable.dart' as src;
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart' as src;
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/config.dart' as src;
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/executable.dart' as src;
 
 import 'package:test/test.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fltool;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fltool;
 
 import '../src/context.dart';
 import '../src/fake_device.dart';
 import '../src/fake_device_manager.dart';
 import '../src/fake_process_manager.dart';
 
-class MockConfig implements src.FlutterPiToolConfig {
+class MockConfig implements src.FlutterDrmBundlerConfig {
   MockConfig();
 
   void Function(src.DeviceConfigEntry)? addDeviceFn;
@@ -383,7 +383,7 @@ class MockSshUtils implements SshUtils {
 void main() {
   late MemoryFileSystem fs;
   late fltool.BufferLogger logger;
-  late src.FlutterpiToolCommandRunner runner;
+  late src.FlutterDrmBundlerCommandRunner runner;
   late MockConfig config;
   late MockSshUtils sshUtils;
 
@@ -395,7 +395,7 @@ void main() {
     return await runInTestContext(
       fn,
       overrides: {
-        src.FlutterPiToolConfig: () => config,
+        src.FlutterDrmBundlerConfig: () => config,
         fltool.Logger: () => logger,
         ProcessManager: () => FakeProcessManager.empty(),
         FileSystem: () => fs,
@@ -408,7 +408,7 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = fltool.BufferLogger.test();
-    runner = src.createFlutterpiCommandRunner();
+    runner = src.createFlutterDrmBundlerCommandRunner();
     config = MockConfig();
     sshUtils = MockSshUtils()
       ..remoteUserBelongsToGroupsFn = (groups, {remote}) async {
@@ -461,7 +461,7 @@ void main() {
             containsDeviceWasCalled,
             isTrue,
             reason: 'containsDeviceFn should have been called before '
-                'FlutterPiToolConfig.addDevice',
+                'FlutterDrmBundlerConfig.addDevice',
           );
           addDeviceWasCalled = true;
         }
@@ -697,7 +697,7 @@ void main() {
                 sshExecutable: null,
                 sshRemote: 'test-device',
                 remoteInstallPath: null,
-                filesystemLayout: FilesystemLayout.flutterPi,
+                filesystemLayout: FilesystemLayout.flutterDrm,
               ),
             );
             addDeviceWasCalled = true;
@@ -717,7 +717,7 @@ void main() {
         );
       });
 
-      test('flutter-pi', () async {
+      test('flutter-drm', () async {
         var addDeviceWasCalled = false;
         config
           ..addDeviceFn = (entry) {
@@ -728,7 +728,7 @@ void main() {
                 sshExecutable: null,
                 sshRemote: 'test-device',
                 remoteInstallPath: null,
-                filesystemLayout: FilesystemLayout.flutterPi,
+                filesystemLayout: FilesystemLayout.flutterDrm,
               ),
             );
             addDeviceWasCalled = true;
@@ -739,7 +739,7 @@ void main() {
 
         await _runInTestContext(() async {
           await runner
-              .run(['devices', 'add', 'test-device', '--fs-layout=flutter-pi']);
+              .run(['devices', 'add', 'test-device', '--fs-layout=flutter-drm']);
         });
 
         expect(

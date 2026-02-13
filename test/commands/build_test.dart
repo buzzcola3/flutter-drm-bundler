@@ -3,30 +3,30 @@ import 'dart:io';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/build_system/build_app.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/executable.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/build_system/build_app.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/executable.dart';
 import 'package:test/test.dart';
 
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 
 import '../src/context.dart';
 import '../src/fake_flutter_version.dart';
 import '../src/fake_process_manager.dart';
 import '../src/mock_app_builder.dart';
-import '../src/mock_flutterpi_artifacts.dart';
+import '../src/mock_flutter_drm_embedder_artifacts.dart';
 import '../src/test_feature_flags.dart';
 
 void main() {
   late MemoryFileSystem fs;
   late fl.BufferLogger logger;
-  late FlutterpiToolCommandRunner runner;
+  late FlutterDrmBundlerCommandRunner runner;
   late fl.Platform platform;
-  late MockFlutterpiArtifacts flutterpiArtifacts;
+  late MockFlutterDrmEmbedderArtifacts flutterDrmEmbedderArtifacts;
   late MockAppBuilder appBuilder;
 
   // ignore: no_leading_underscores_for_local_identifiers
@@ -42,7 +42,7 @@ void main() {
         FileSystem: () => fs,
         fl.FlutterVersion: () => FakeFlutterVersion(),
         Platform: () => platform,
-        fl.Artifacts: () => flutterpiArtifacts,
+        fl.Artifacts: () => flutterDrmEmbedderArtifacts,
         AppBuilder: () => appBuilder,
         fl.FeatureFlags: () => TestFeatureFlags(),
         ...overrides,
@@ -53,9 +53,9 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = fl.BufferLogger.test();
-    runner = createFlutterpiCommandRunner();
+    runner = createFlutterDrmBundlerCommandRunner();
     platform = fl.FakePlatform();
-    flutterpiArtifacts = MockFlutterpiArtifacts();
+    flutterDrmEmbedderArtifacts = MockFlutterDrmEmbedderArtifacts();
     appBuilder = MockAppBuilder();
 
     fs.file('lib/main.dart')
@@ -66,12 +66,12 @@ void main() {
   test('simple dart defines work', () async {
     var buildWasCalled = false;
     appBuilder.buildFn = ({
-      required FlutterpiHostPlatform host,
-      required FlutterpiTargetPlatform target,
+      required FlutterDrmHostPlatform host,
+      required FlutterDrmTargetPlatform target,
       required fl.BuildInfo buildInfo,
       required FilesystemLayout fsLayout,
       fl.FlutterProject? project,
-      FlutterpiArtifacts? artifacts,
+      FlutterDrmEmbedderArtifacts? artifacts,
       String? mainPath,
       String manifestPath = fl.defaultManifestPath,
       String? applicationKernelFilePath,
@@ -79,7 +79,7 @@ void main() {
       Directory? outDir,
       bool unoptimized = false,
       bool includeDebugSymbols = false,
-      bool forceBundleFlutterpi = false,
+      bool forceBundleEmbedder = false,
     }) async {
       buildWasCalled = true;
       expect(buildInfo.dartDefines, contains('FOO=BAR'));
@@ -104,12 +104,12 @@ void main() {
     var buildWasCalled = false;
 
     appBuilder.buildFn = ({
-      required FlutterpiHostPlatform host,
-      required FlutterpiTargetPlatform target,
+      required FlutterDrmHostPlatform host,
+      required FlutterDrmTargetPlatform target,
       required fl.BuildInfo buildInfo,
       required FilesystemLayout fsLayout,
       fl.FlutterProject? project,
-      FlutterpiArtifacts? artifacts,
+      FlutterDrmEmbedderArtifacts? artifacts,
       String? mainPath,
       String manifestPath = fl.defaultManifestPath,
       String? applicationKernelFilePath,
@@ -117,7 +117,7 @@ void main() {
       Directory? outDir,
       bool unoptimized = false,
       bool includeDebugSymbols = false,
-      bool forceBundleFlutterpi = false,
+      bool forceBundleEmbedder = false,
     }) async {
       expect(buildInfo.dartDefines, contains('FOO=BAR'));
       buildWasCalled = true;
@@ -139,12 +139,12 @@ void main() {
     test('debug mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -152,7 +152,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.mode, equals(fl.BuildMode.debug));
         expect(unoptimized, isFalse);
@@ -173,12 +173,12 @@ void main() {
     test('profile mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -186,7 +186,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.mode, equals(fl.BuildMode.profile));
         expect(unoptimized, isFalse);
@@ -207,12 +207,12 @@ void main() {
     test('release mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -220,7 +220,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.mode, equals(fl.BuildMode.release));
         expect(unoptimized, isFalse);
@@ -241,12 +241,12 @@ void main() {
     test('debug-unoptimized mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -254,7 +254,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.mode, equals(fl.BuildMode.debug));
         expect(unoptimized, isTrue);
@@ -277,12 +277,12 @@ void main() {
     test('debug mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -290,7 +290,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(
           buildInfo.treeShakeIcons,
@@ -314,12 +314,12 @@ void main() {
     test('profile mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -327,7 +327,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.treeShakeIcons, isTrue);
         buildWasCalled = true;
@@ -347,12 +347,12 @@ void main() {
     test('release mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -360,7 +360,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(buildInfo.treeShakeIcons, isTrue);
         buildWasCalled = true;
@@ -380,12 +380,12 @@ void main() {
     test('debug-unoptimized mode works', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -393,7 +393,7 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(
           buildInfo.treeShakeIcons,
@@ -420,12 +420,12 @@ void main() {
   test('target path works', () async {
     var buildWasCalled = false;
     appBuilder.buildFn = ({
-      required FlutterpiHostPlatform host,
-      required FlutterpiTargetPlatform target,
+      required FlutterDrmHostPlatform host,
+      required FlutterDrmTargetPlatform target,
       required fl.BuildInfo buildInfo,
       required FilesystemLayout fsLayout,
       fl.FlutterProject? project,
-      FlutterpiArtifacts? artifacts,
+      FlutterDrmEmbedderArtifacts? artifacts,
       String? mainPath,
       String manifestPath = fl.defaultManifestPath,
       String? applicationKernelFilePath,
@@ -433,7 +433,7 @@ void main() {
       Directory? outDir,
       bool unoptimized = false,
       bool includeDebugSymbols = false,
-      bool forceBundleFlutterpi = false,
+      bool forceBundleEmbedder = false,
     }) async {
       expect(mainPath, equals('lib/other_main.dart'));
       buildWasCalled = true;
@@ -458,12 +458,12 @@ void main() {
     test('default', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -471,10 +471,10 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
-        expect(fsLayout, equals(FilesystemLayout.flutterPi));
-        expect(forceBundleFlutterpi, isFalse);
+        expect(fsLayout, equals(FilesystemLayout.flutterDrm));
+        expect(forceBundleEmbedder, isFalse);
         buildWasCalled = true;
       };
 
@@ -489,15 +489,15 @@ void main() {
       );
     });
 
-    test('flutter-pi', () async {
+    test('flutter-drm', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -505,10 +505,10 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
-        expect(fsLayout, equals(FilesystemLayout.flutterPi));
-        expect(forceBundleFlutterpi, isFalse);
+        expect(fsLayout, equals(FilesystemLayout.flutterDrm));
+        expect(forceBundleEmbedder, isFalse);
         buildWasCalled = true;
       };
 
@@ -526,12 +526,12 @@ void main() {
     test('meta-flutter', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -539,10 +539,10 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(fsLayout, equals(FilesystemLayout.metaFlutter));
-        expect(forceBundleFlutterpi, isFalse);
+        expect(forceBundleEmbedder, isFalse);
         buildWasCalled = true;
       };
 
@@ -557,15 +557,15 @@ void main() {
       );
     });
 
-    test('flutter-pi, --flutterpi-binary=test', () async {
+    test('flutter-drm, --embedder-binary=test', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -573,20 +573,20 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
-        expect(fsLayout, equals(FilesystemLayout.flutterPi));
-        expect(forceBundleFlutterpi, isTrue);
+        expect(fsLayout, equals(FilesystemLayout.flutterDrm));
+        expect(forceBundleEmbedder, isTrue);
         buildWasCalled = true;
       };
 
       fs.currentDirectory
           .childFile('test')
-          .writeAsStringSync('test-flutterpi-binary');
+          .writeAsStringSync('test-embedder-binary');
 
       await _runInTestContext(() async {
         await runner.run(
-          ['build', '--fs-layout=flutter-pi', '--flutterpi-binary=test'],
+          ['build', '--fs-layout=flutter-drm', '--embedder-binary=test'],
         );
       });
 
@@ -597,15 +597,15 @@ void main() {
       );
     });
 
-    test('meta-flutter, --flutterpi-binary=test', () async {
+    test('meta-flutter, --embedder-binary=test', () async {
       var buildWasCalled = false;
       appBuilder.buildFn = ({
-        required FlutterpiHostPlatform host,
-        required FlutterpiTargetPlatform target,
+        required FlutterDrmHostPlatform host,
+        required FlutterDrmTargetPlatform target,
         required fl.BuildInfo buildInfo,
         required FilesystemLayout fsLayout,
         fl.FlutterProject? project,
-        FlutterpiArtifacts? artifacts,
+        FlutterDrmEmbedderArtifacts? artifacts,
         String? mainPath,
         String manifestPath = fl.defaultManifestPath,
         String? applicationKernelFilePath,
@@ -613,20 +613,20 @@ void main() {
         Directory? outDir,
         bool unoptimized = false,
         bool includeDebugSymbols = false,
-        bool forceBundleFlutterpi = false,
+        bool forceBundleEmbedder = false,
       }) async {
         expect(fsLayout, equals(FilesystemLayout.metaFlutter));
-        expect(forceBundleFlutterpi, isTrue);
+        expect(forceBundleEmbedder, isTrue);
         buildWasCalled = true;
       };
 
       fs.currentDirectory
           .childFile('test')
-          .writeAsStringSync('test-flutterpi-binary');
+          .writeAsStringSync('test-embedder-binary');
 
       await _runInTestContext(() async {
         await runner.run(
-          ['build', '--fs-layout=meta-flutter', '--flutterpi-binary=test'],
+          ['build', '--fs-layout=meta-flutter', '--embedder-binary=test'],
         );
       });
 
@@ -638,15 +638,15 @@ void main() {
     });
   });
 
-  test('build system artifacts is a flutterpi artifacts', () async {
+  test('build system artifacts is a flutter-drm-embedder artifacts', () async {
     var buildWasCalled = false;
     appBuilder.buildFn = ({
-      required FlutterpiHostPlatform host,
-      required FlutterpiTargetPlatform target,
+      required FlutterDrmHostPlatform host,
+      required FlutterDrmTargetPlatform target,
       required fl.BuildInfo buildInfo,
       required FilesystemLayout fsLayout,
       fl.FlutterProject? project,
-      FlutterpiArtifacts? artifacts,
+      FlutterDrmEmbedderArtifacts? artifacts,
       String? mainPath,
       String manifestPath = fl.defaultManifestPath,
       String? applicationKernelFilePath,
@@ -654,9 +654,9 @@ void main() {
       Directory? outDir,
       bool unoptimized = false,
       bool includeDebugSymbols = false,
-      bool forceBundleFlutterpi = false,
+      bool forceBundleEmbedder = false,
     }) async {
-      expect(artifacts ?? globals.artifacts, isA<FlutterpiArtifacts>());
+      expect(artifacts ?? globals.artifacts, isA<FlutterDrmEmbedderArtifacts>());
 
       buildWasCalled = true;
     };

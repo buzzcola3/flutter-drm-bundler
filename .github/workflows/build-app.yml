@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Flutter-Pi Bundle (${{ matrix.arch }}, ${{ matrix.cpu}})
+    name: Build Flutter DRM Bundle (${{ matrix.arch }}, ${{ matrix.cpu}})
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -48,23 +48,23 @@ jobs:
       - name: Create test app
         run: flutter create test_app
 
-      - name: Run FlutterPi-plugin-bridge-tool build
+      - name: Run flutter-drm-bundler build
         working-directory: test_app
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         run: |
-          echo '::group::FlutterPi-plugin-bridge-tool build ... --debug-unoptimized'
-          FlutterPi-plugin-bridge-tool build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --debug-unoptimized --debug-symbols --verbose
+          echo '::group::flutter-drm-bundler build ... --debug-unoptimized'
+          flutter-drm-bundler build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --debug-unoptimized --debug-symbols --verbose
           echo '::endgroup::'
 
-          echo '::group::FlutterPi-plugin-bridge-tool build ... --debug'
-          FlutterPi-plugin-bridge-tool build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --debug --debug-symbols --verbose
+          echo '::group::flutter-drm-bundler build ... --debug'
+          flutter-drm-bundler build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --debug --debug-symbols --verbose
           echo '::endgroup::'
           
-          echo '::group::FlutterPi-plugin-bridge-tool build ... --profile'
-          FlutterPi-plugin-bridge-tool build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --profile --debug-symbols --verbose
+          echo '::group::flutter-drm-bundler build ... --profile'
+          flutter-drm-bundler build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --profile --debug-symbols --verbose
           echo '::endgroup::'
 
-          echo '::group::FlutterPi-plugin-bridge-tool build ... --release'
-          FlutterPi-plugin-bridge-tool build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --release --debug-symbols --verbose
+          echo '::group::flutter-drm-bundler build ... --release'
+          flutter-drm-bundler build --arch=${{ matrix.arch }} --cpu=${{ matrix.cpu }} --release --debug-symbols --verbose
           echo '::endgroup::'

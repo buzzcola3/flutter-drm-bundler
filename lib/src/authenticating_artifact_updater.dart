@@ -3,8 +3,8 @@
 import 'dart:async';
 import 'dart:io' as io;
 import 'package:archive/archive_io.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:meta/meta.dart';
 
 @visibleForTesting

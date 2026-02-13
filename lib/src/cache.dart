@@ -4,22 +4,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
-import 'package:flutterpi_tool/src/authenticating_artifact_updater.dart';
-import 'package:flutterpi_tool/src/github.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/authenticating_artifact_updater.dart';
+import 'package:flutter_drm_bundler/src/github.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:github/github.dart' as gh;
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
 import 'package:meta/meta.dart';
 
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 import 'package:package_config/package_config.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 
-FlutterpiCache get flutterpiCache => globals.cache as FlutterpiCache;
+FlutterDrmBundlerCache get flutterDrmBundlerCache => globals.cache as FlutterDrmBundlerCache;
 
 extension GithubReleaseFindAsset on gh.Release {
   gh.ReleaseAsset? findAsset(String name) {
@@ -32,7 +32,7 @@ extension GithubReleaseFindAsset on gh.Release {
 
 class EngineArtifactDescription {
   EngineArtifactDescription.target(
-    FlutterpiTargetPlatform this.target,
+    FlutterDrmTargetPlatform this.target,
     EngineFlavor this.flavor, {
     required this.prefix,
     required this.cacheKey,
@@ -41,8 +41,8 @@ class EngineArtifactDescription {
         runtimeMode = null;
 
   EngineArtifactDescription.hostTarget(
-    FlutterpiHostPlatform this.host,
-    FlutterpiTargetPlatform this.target,
+    FlutterDrmHostPlatform this.host,
+    FlutterDrmTargetPlatform this.target,
     BuildMode this.runtimeMode, {
     required this.prefix,
     required this.cacheKey,
@@ -61,15 +61,15 @@ class EngineArtifactDescription {
   final String prefix;
   final String cacheKey;
 
-  final FlutterpiHostPlatform? host;
-  final FlutterpiTargetPlatform? target;
+  final FlutterDrmHostPlatform? host;
+  final FlutterDrmTargetPlatform? target;
   final EngineFlavor? flavor;
   final BuildMode? runtimeMode;
   final bool? includeDebugSymbols;
 
   bool requiredFor({
-    required FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+    required FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<EngineFlavor> flavors,
     required Set<BuildMode> runtimeModes,
     required bool includeDebugSymbols,
@@ -92,8 +92,8 @@ class EngineArtifactDescription {
   }
 }
 
-class FlutterpiBinaries extends ArtifactSet {
-  FlutterpiBinaries({
+class FlutterDrmEmbedderBinaries extends ArtifactSet {
+  FlutterDrmEmbedderBinaries({
     required this.cache,
     required this.fs,
     required this.httpClient,
@@ -108,7 +108,7 @@ class FlutterpiBinaries extends ArtifactSet {
   final Logger logger;
   final ProcessManager processManager;
   final gh.RepositorySlug repo =
-      gh.RepositorySlug('buzzcola3', 'FlutterPi-plugin-bridge');
+      gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder');
   final MyGithub github;
 
   Future<String?> _getLatestReleaseTag() async {
@@ -175,7 +175,7 @@ class FlutterpiBinaries extends ArtifactSet {
     final latestReleaseTag = await _getLatestReleaseTag();
     if (latestReleaseTag != version) {
       logger.printTrace(
-        'The latest flutter-pi release tag is $latestReleaseTag, but the '
+        'The latest flutter-drm-embedder release tag is $latestReleaseTag, but the '
         'current version is $version, so there might be a new GitHub release. '
         'Checking with GitHub API...',
       );
@@ -183,7 +183,7 @@ class FlutterpiBinaries extends ArtifactSet {
       final latestRelease = await _getLatestVersion();
       if (latestRelease != version) {
         logger.printTrace(
-          'There is a new flutter-pi release available: $latestRelease. '
+          'There is a new flutter-drm-embedder release available: $latestRelease. '
           'Current version: $version',
         );
         return false;
@@ -207,12 +207,12 @@ class FlutterpiBinaries extends ArtifactSet {
         }
       } on gh.GitHubError catch (e) {
         logger.printWarning(
-          'Failed to check for flutter-pi updates: ${e.message}',
+          'Failed to check for flutter-drm-embedder updates: ${e.message}',
         );
         return true;
       } on io.ProcessException catch (e) {
         logger.printWarning(
-          'Failed to run git to check for flutter-pi updates: ${e.message}',
+          'Failed to run git to check for flutter-drm-embedder updates: ${e.message}',
         );
         return true;
       }
@@ -225,10 +225,10 @@ class FlutterpiBinaries extends ArtifactSet {
   Map<String, String> get environment => <String, String>{};
 
   @override
-  String get name => 'flutter-pi';
+  String get name => 'flutter-drm-embedder';
 
   @override
-  String get stampName => 'flutter-pi';
+  String get stampName => 'flutter-drm-embedder';
 
   Directory get location => cache.getArtifactDirectory(name);
 
@@ -241,7 +241,7 @@ class FlutterpiBinaries extends ArtifactSet {
     bool offline = false,
   }) async {
     if (offline) {
-      throwToolExit('Cannot download flutter-pi binaries in offline mode.');
+      throwToolExit('Cannot download flutter-drm-embedder binaries in offline mode.');
     }
 
     if (!location.existsSync()) {
@@ -266,7 +266,7 @@ class FlutterpiBinaries extends ArtifactSet {
       ])
         for (final type in ['release', 'debug'])
           (
-            'flutterpi-$triple-$type.tar.xz',
+            'flutter-drm-embedder-$triple-$type.tar.xz',
             [triple, type],
           ),
     ];
@@ -280,7 +280,7 @@ class FlutterpiBinaries extends ArtifactSet {
       ])
         for (final type in ['release', 'debug'])
           (
-            'flutterpi-gtk-shim-$triple-$type.tar.xz',
+            'flutter-drm-gtk-shim-$triple-$type.tar.xz',
             ['gtk-shim', triple, type],
           ),
     ];
@@ -325,8 +325,8 @@ class FlutterpiBinaries extends ArtifactSet {
   }
 }
 
-abstract class FlutterpiArtifact extends EngineCachedArtifact {
-  FlutterpiArtifact(String cacheKey, {required Cache cache})
+abstract class FlutterDrmEmbedderArtifact extends EngineCachedArtifact {
+  FlutterDrmEmbedderArtifact(String cacheKey, {required Cache cache})
       : super(cacheKey, cache, DevelopmentArtifact.universal);
 
   String get storageKey;
@@ -353,8 +353,8 @@ abstract class FlutterpiArtifact extends EngineCachedArtifact {
 
   @visibleForTesting
   bool requiredFor({
-    required FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+    required FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<EngineFlavor> flavors,
     required Set<BuildMode> runtimeModes,
     required bool includeDebugSymbols,
@@ -374,7 +374,7 @@ abstract class FlutterpiArtifact extends EngineCachedArtifact {
   }
 }
 
-class GithubWorkflowRunArtifact extends FlutterpiArtifact {
+class GithubWorkflowRunArtifact extends FlutterDrmEmbedderArtifact {
   GithubWorkflowRunArtifact({
     required this.myGithub,
     gh.RepositorySlug? repo,
@@ -382,7 +382,7 @@ class GithubWorkflowRunArtifact extends FlutterpiArtifact {
     this.availableEngineVersion,
     required super.cache,
     required this.artifactDescription,
-  })  : repo = repo ?? gh.RepositorySlug('ardera', 'flutter-ci'),
+  })  : repo = repo ?? gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder'),
         storageKey = _getStorageKeyForArtifact(artifactDescription),
         super(artifactDescription.cacheKey);
 
@@ -401,8 +401,8 @@ class GithubWorkflowRunArtifact extends FlutterpiArtifact {
   ) {
     return [
       description.prefix,
-      if (description.host case FlutterpiHostPlatform host) host.githubName,
-      if (description.target case FlutterpiTargetPlatform target) target,
+      if (description.host case FlutterDrmHostPlatform host) host.githubName,
+      if (description.target case FlutterDrmTargetPlatform target) target,
       if (description.flavor case EngineFlavor flavor) flavor.name,
       if (description.runtimeMode case BuildMode runtimeMode) runtimeMode.name,
     ].join('-');
@@ -455,8 +455,8 @@ class GithubWorkflowRunArtifact extends FlutterpiArtifact {
 
   @override
   bool requiredFor({
-    required FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+    required FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<EngineFlavor> flavors,
     required Set<BuildMode> runtimeModes,
     required bool includeDebugSymbols,
@@ -476,13 +476,13 @@ class GithubWorkflowRunArtifact extends FlutterpiArtifact {
   }
 }
 
-class GithubReleaseArtifact extends FlutterpiArtifact {
+class GithubReleaseArtifact extends FlutterDrmEmbedderArtifact {
   GithubReleaseArtifact({
     gh.RepositorySlug? repo,
     required super.cache,
     required this.github,
     required this.artifactDescription,
-  })  : repo = repo ?? gh.RepositorySlug('ardera', 'flutter-ci'),
+  })  : repo = repo ?? gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder'),
         storageKey = getStorageKeyForArtifact(artifactDescription),
         super(artifactDescription.cacheKey);
 
@@ -568,8 +568,8 @@ class GithubReleaseArtifact extends FlutterpiArtifact {
 
   @override
   bool requiredFor({
-    required FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+    required FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<EngineFlavor> flavors,
     required Set<BuildMode> runtimeModes,
     required bool includeDebugSymbols,
@@ -589,8 +589,8 @@ class GithubReleaseArtifact extends FlutterpiArtifact {
   }
 }
 
-abstract class FlutterpiCache extends Cache {
-  FlutterpiCache.withoutArtifacts({
+abstract class FlutterDrmBundlerCache extends Cache {
+  FlutterDrmBundlerCache.withoutArtifacts({
     @protected super.rootOverride,
     @protected super.artifacts,
     required this.logger,
@@ -605,7 +605,7 @@ abstract class FlutterpiCache extends Cache {
           osUtils: osUtils,
         );
 
-  factory FlutterpiCache.test({
+  factory FlutterDrmBundlerCache.test({
     Directory? rootOverride,
     List<ArtifactSet> artifacts,
     required Logger logger,
@@ -616,9 +616,9 @@ abstract class FlutterpiCache extends Cache {
     required ShutdownHooks hooks,
     required MyGithub github,
     io.HttpClient? httpClient,
-  }) = FlutterpiCacheWithoutFlutterArtifacts.test;
+  }) = FlutterDrmBundlerCacheWithoutFlutterArtifacts.test;
 
-  factory FlutterpiCache({
+  factory FlutterDrmBundlerCache({
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -628,9 +628,9 @@ abstract class FlutterpiCache extends Cache {
     required ShutdownHooks hooks,
     required MyGithub github,
     gh.RepositorySlug? repo,
-  }) = FlutterpiCacheWithFlutterArtifacts;
+  }) = FlutterDrmBundlerCacheWithFlutterArtifacts;
 
-  factory FlutterpiCache.fromWorkflow({
+  factory FlutterDrmBundlerCache.fromWorkflow({
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -642,7 +642,7 @@ abstract class FlutterpiCache extends Cache {
     gh.RepositorySlug? repo,
     required String runId,
     String? availableEngineVersion,
-  }) = FlutterpiCacheWithFlutterArtifacts.fromWorkflow;
+  }) = FlutterDrmBundlerCacheWithFlutterArtifacts.fromWorkflow;
 
   @protected
   final Logger logger;
@@ -658,9 +658,9 @@ abstract class FlutterpiCache extends Cache {
   late final http.Client pkgHttpHttpClient = http.IOClient(httpClient);
 
   @visibleForTesting
-  Set<FlutterpiArtifact> requiredArtifacts({
-    FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+  Set<FlutterDrmEmbedderArtifact> requiredArtifacts({
+    FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<BuildMode> runtimeModes,
     required Set<EngineFlavor> flavors,
     bool includeDebugSymbols = false,
@@ -670,15 +670,15 @@ abstract class FlutterpiCache extends Cache {
   Future<void> updateAll(
     Set<DevelopmentArtifact> requiredArtifacts, {
     bool offline = false,
-    FlutterpiHostPlatform? host,
-    Set<FlutterpiTargetPlatform> flutterpiPlatforms = const {},
+    FlutterDrmHostPlatform? host,
+    Set<FlutterDrmTargetPlatform> flutterDrmPlatforms = const {},
     Set<BuildMode> runtimeModes = const {},
     Set<EngineFlavor> engineFlavors = const {},
     bool includeDebugSymbols = false,
   });
 }
 
-mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
+mixin FlutterDrmBundlerCacheMixin on Cache implements FlutterDrmBundlerCache {
   @protected
   final List<ArtifactSet> artifacts = [];
 
@@ -693,12 +693,8 @@ mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
   List<String> get allowedBaseUrls => [
         cipdBaseUrl,
         storageBaseUrl,
-      'https://github.com/buzzcola3/FlutterPi-plugin-bridge/',
-      'https://api.github.com/repos/buzzcola3/FlutterPi-plugin-bridge/',
-      'https://github.com/ardera/flutter-pi/',
-        'https://github.com/ardera/flutter-ci/',
-      'https://api.github.com/repos/ardera/flutter-pi/',
-        'https://api.github.com/repos/ardera/flutter-ci/',
+        'https://github.com/buzzcola3/flutter-drm-embedder/',
+        'https://api.github.com/repos/buzzcola3/flutter-drm-embedder/',
       ];
 
   /// This has to be lazy because it requires FLUTTER_ROOT to be initialized.
@@ -717,16 +713,16 @@ mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
 
   @override
   @visibleForTesting
-  Set<FlutterpiArtifact> requiredArtifacts({
-    FlutterpiHostPlatform? host,
-    required Set<FlutterpiTargetPlatform> targets,
+  Set<FlutterDrmEmbedderArtifact> requiredArtifacts({
+    FlutterDrmHostPlatform? host,
+    required Set<FlutterDrmTargetPlatform> targets,
     required Set<BuildMode> runtimeModes,
     required Set<EngineFlavor> flavors,
     bool includeDebugSymbols = false,
   }) {
     return {
       for (final artifact in artifacts)
-        if (artifact is FlutterpiArtifact)
+        if (artifact is FlutterDrmEmbedderArtifact)
           if (artifact.requiredFor(
             host: host,
             targets: targets,
@@ -742,8 +738,8 @@ mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
   Future<void> updateAll(
     Set<DevelopmentArtifact> requiredArtifacts, {
     bool offline = false,
-    FlutterpiHostPlatform? host,
-    Set<FlutterpiTargetPlatform> flutterpiPlatforms = const {},
+    FlutterDrmHostPlatform? host,
+    Set<FlutterDrmTargetPlatform> flutterDrmPlatforms = const {},
     Set<BuildMode> runtimeModes = const {},
     Set<EngineFlavor> engineFlavors = const {},
     bool includeDebugSymbols = false,
@@ -752,9 +748,9 @@ mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
 
     for (final artifact in artifacts) {
       final required = switch (artifact) {
-        FlutterpiArtifact artifact => artifact.requiredFor(
+        FlutterDrmEmbedderArtifact artifact => artifact.requiredFor(
             host: host,
-            targets: flutterpiPlatforms,
+            targets: flutterDrmPlatforms,
             flavors: engineFlavors,
             runtimeModes: runtimeModes,
             includeDebugSymbols: includeDebugSymbols,
@@ -785,11 +781,11 @@ mixin FlutterpiCacheMixin on Cache implements FlutterpiCache {
   }
 }
 
-class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
-    with FlutterpiCacheMixin
-    implements FlutterpiCache {
+class FlutterDrmBundlerCacheWithFlutterArtifacts extends FlutterCache
+    with FlutterDrmBundlerCacheMixin
+    implements FlutterDrmBundlerCache {
   @protected
-  FlutterpiCacheWithFlutterArtifacts.withoutEngineArtifacts({
+  FlutterDrmBundlerCacheWithFlutterArtifacts.withoutEngineArtifacts({
     required this.logger,
     required this.fileSystem,
     required this.platform,
@@ -813,7 +809,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     });
 
     registerArtifact(
-      FlutterpiBinaries(
+      FlutterDrmEmbedderBinaries(
         cache: this,
         fs: fileSystem,
         httpClient: pkgHttpHttpClient,
@@ -824,7 +820,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     );
   }
 
-  factory FlutterpiCacheWithFlutterArtifacts({
+  factory FlutterDrmBundlerCacheWithFlutterArtifacts({
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -835,9 +831,9 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     required MyGithub github,
     gh.RepositorySlug? repo,
   }) {
-    repo ??= gh.RepositorySlug('ardera', 'flutter-ci');
+    repo ??= gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder');
 
-    final cache = FlutterpiCacheWithFlutterArtifacts.withoutEngineArtifacts(
+    final cache = FlutterDrmBundlerCacheWithFlutterArtifacts.withoutEngineArtifacts(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -862,7 +858,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     return cache;
   }
 
-  factory FlutterpiCacheWithFlutterArtifacts.fromWorkflow({
+  factory FlutterDrmBundlerCacheWithFlutterArtifacts.fromWorkflow({
     required Logger logger,
     required FileSystem fileSystem,
     required Platform platform,
@@ -875,9 +871,9 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     required String runId,
     String? availableEngineVersion,
   }) {
-    repo ??= gh.RepositorySlug('ardera', 'flutter-ci');
+    repo ??= gh.RepositorySlug('buzzcola3', 'flutter-drm-embedder');
 
-    final cache = FlutterpiCacheWithFlutterArtifacts.withoutEngineArtifacts(
+    final cache = FlutterDrmBundlerCacheWithFlutterArtifacts.withoutEngineArtifacts(
       logger: logger,
       fileSystem: fileSystem,
       platform: platform,
@@ -907,14 +903,14 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
   @protected
   static List<EngineArtifactDescription> generateDescriptions() {
     final hosts = {
-      FlutterpiHostPlatform.darwinX64,
-      FlutterpiHostPlatform.linuxARM,
-      FlutterpiHostPlatform.linuxARM64,
-      FlutterpiHostPlatform.linuxX64,
-      FlutterpiHostPlatform.windowsX64,
+      FlutterDrmHostPlatform.darwinX64,
+      FlutterDrmHostPlatform.linuxARM,
+      FlutterDrmHostPlatform.linuxARM64,
+      FlutterDrmHostPlatform.linuxX64,
+      FlutterDrmHostPlatform.windowsX64,
     };
 
-    final targets = FlutterpiTargetPlatform.values;
+    final targets = FlutterDrmTargetPlatform.values;
     final flavors = EngineFlavor.values;
     final aotRuntimeModes = [
       BuildMode.profile,
@@ -935,7 +931,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
             target,
             flavor,
             prefix: 'engine',
-            cacheKey: 'flutterpi-engine-$target-$flavor',
+            cacheKey: 'flutter-drm-engine-$target-$flavor',
           ),
         );
 
@@ -944,7 +940,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
             target,
             flavor,
             prefix: 'engine-dbgsyms',
-            cacheKey: 'flutterpi-engine-dbgsyms-$target-$flavor',
+            cacheKey: 'flutter-drm-engine-dbgsyms-$target-$flavor',
             includeDebugSymbols: true,
           ),
         );
@@ -971,7 +967,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
               target,
               runtimeMode,
               prefix: 'gen-snapshot',
-              cacheKey: 'flutterpi-gen-snapshot-$host-$target-$runtimeMode',
+              cacheKey: 'flutter-drm-gen-snapshot-$host-$target-$runtimeMode',
             ),
           );
         }
@@ -981,7 +977,7 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
     descriptions.add(
       EngineArtifactDescription.universal(
         prefix: 'universal',
-        cacheKey: 'flutterpi-universal',
+        cacheKey: 'flutter-drm-universal',
       ),
     );
 
@@ -1007,11 +1003,11 @@ class FlutterpiCacheWithFlutterArtifacts extends FlutterCache
   Platform platform;
 }
 
-class FlutterpiCacheWithoutFlutterArtifacts extends Cache
-    with FlutterpiCacheMixin
-    implements FlutterpiCache {
+class FlutterDrmBundlerCacheWithoutFlutterArtifacts extends Cache
+    with FlutterDrmBundlerCacheMixin
+    implements FlutterDrmBundlerCache {
   @protected
-  FlutterpiCacheWithoutFlutterArtifacts.test({
+  FlutterDrmBundlerCacheWithoutFlutterArtifacts.test({
     Directory? rootOverride,
     List<ArtifactSet> artifacts = const [],
     required this.logger,

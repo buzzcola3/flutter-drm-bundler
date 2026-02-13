@@ -1,5 +1,5 @@
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 import 'package:meta/meta.dart';
 
 class DeviceConfigEntry {
@@ -12,7 +12,7 @@ class DeviceConfigEntry {
     this.devicePixelRatio,
     this.useDummyDisplay = false,
     this.dummyDisplaySize,
-    this.filesystemLayout = FilesystemLayout.flutterPi,
+    this.filesystemLayout = FilesystemLayout.flutterDrm,
   });
 
   final String id;
@@ -43,7 +43,7 @@ class DeviceConfigEntry {
       },
       filesystemLayout: switch (map['filesystemLayout']) {
         String string => FilesystemLayout.fromString(string),
-        _ => FilesystemLayout.flutterPi,
+        _ => FilesystemLayout.flutterDrm,
       },
     );
   }
@@ -61,7 +61,7 @@ class DeviceConfigEntry {
       if (useDummyDisplay == true) 'useDummyDisplay': true,
       if (dummyDisplaySize case (final width, final height))
         'dummyDisplaySize': [width, height],
-      if (filesystemLayout != FilesystemLayout.flutterPi)
+      if (filesystemLayout != FilesystemLayout.flutterDrm)
         'filesystemLayout': filesystemLayout.toString(),
     };
   }
@@ -113,20 +113,20 @@ class DeviceConfigEntry {
   }
 }
 
-class FlutterPiToolConfig {
-  FlutterPiToolConfig({
+class FlutterDrmBundlerConfig {
+  FlutterDrmBundlerConfig({
     required FileSystem fs,
     required Logger logger,
     required Platform platform,
   }) : _config = Config(
-          'flutterpi_tool_config',
+          'flutter_drm_bundler_config',
           fileSystem: fs,
           logger: logger,
           platform: platform,
         );
 
   @visibleForTesting
-  FlutterPiToolConfig.test({
+  FlutterDrmBundlerConfig.test({
     required FileSystem fs,
     required Logger logger,
     required Platform platform,

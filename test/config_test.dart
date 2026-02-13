@@ -1,22 +1,22 @@
 import 'dart:convert';
 
 import 'package:file/memory.dart';
-import 'package:flutterpi_tool/src/config.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/config.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 import 'package:test/test.dart';
 
 void main() {
   late MemoryFileSystem fs;
   late FakePlatform platform;
   late BufferLogger logger;
-  late FlutterPiToolConfig config;
+  late FlutterDrmBundlerConfig config;
 
   setUp(() {
     fs = MemoryFileSystem.test();
     platform = FakePlatform();
     logger = BufferLogger.test();
     config =
-        FlutterPiToolConfig.test(fs: fs, logger: logger, platform: platform);
+        FlutterDrmBundlerConfig.test(fs: fs, logger: logger, platform: platform);
   });
 
   test('adding a config', () {

@@ -1,15 +1,15 @@
 // ignore_for_file: avoid_print, implementation_imports
 
 import 'package:args/command_runner.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 
-class FlutterpiToolCommandRunner extends CommandRunner<void>
+class FlutterDrmBundlerCommandRunner extends CommandRunner<void>
     implements FlutterCommandRunner {
-  FlutterpiToolCommandRunner({bool verboseHelp = false})
+  FlutterDrmBundlerCommandRunner({bool verboseHelp = false})
       : super(
-          'FlutterPi-plugin-bridge-tool',
-          'FlutterPi-plugin-bridge-tool - a tool to make development & distribution of flutter-pi apps easier.',
+          'flutter-drm-bundler',
+          'flutter-drm-bundler - a tool to make development & distribution of flutter-drm-embedder apps easier.',
           usageLineLength: 120,
         ) {
     argParser.addOption(
@@ -57,7 +57,7 @@ class FlutterpiToolCommandRunner extends CommandRunner<void>
 
   @override
   void addCommand(Command<void> command) {
-    if (command.name != 'help' && command is! FlutterpiCommandMixin) {
+    if (command.name != 'help' && command is! FlutterDrmBundlerCommandMixin) {
       throw ArgumentError('Command is not a FlutterCommand: $command');
     }
 
@@ -77,5 +77,5 @@ class FlutterpiToolCommandRunner extends CommandRunner<void>
   }
 }
 
-abstract class FlutterpiCommand extends FlutterCommand
-    with FlutterpiCommandMixin {}
+abstract class FlutterDrmBundlerCommand extends FlutterCommand
+    with FlutterDrmBundlerCommandMixin {}

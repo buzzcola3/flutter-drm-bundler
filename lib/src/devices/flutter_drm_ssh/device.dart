@@ -2,24 +2,24 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:file/file.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
-import 'package:flutterpi_tool/src/more_os_utils.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-abstract class FlutterpiAppBundle extends fl.ApplicationPackage {
-  FlutterpiAppBundle({
+abstract class FlutterDrmBundlerAppBundle extends fl.ApplicationPackage {
+  FlutterDrmBundlerAppBundle({
     required super.id,
     required this.name,
     required this.displayName,
     this.pluginListFile,
-    this.includesFlutterpiBinary = true,
+    this.includesEmbedderBinary = true,
   });
 
   @override
@@ -30,27 +30,27 @@ abstract class FlutterpiAppBundle extends fl.ApplicationPackage {
 
   final File? pluginListFile;
 
-  final bool includesFlutterpiBinary;
+  final bool includesEmbedderBinary;
 }
 
-class BuildableFlutterpiAppBundle extends FlutterpiAppBundle {
-  BuildableFlutterpiAppBundle({
+class BuildableFlutterDrmBundlerAppBundle extends FlutterDrmBundlerAppBundle {
+  BuildableFlutterDrmBundlerAppBundle({
     required String id,
     required String name,
     required String displayName,
-    super.includesFlutterpiBinary,
+    super.includesEmbedderBinary,
   }) : super(id: id, name: name, displayName: displayName);
 }
 
-class PrebuiltFlutterpiAppBundle extends FlutterpiAppBundle {
-  PrebuiltFlutterpiAppBundle({
+class PrebuiltFlutterDrmBundlerAppBundle extends FlutterDrmBundlerAppBundle {
+  PrebuiltFlutterDrmBundlerAppBundle({
     required String id,
     required String name,
     required String displayName,
     required this.directory,
     required this.binaries,
     super.pluginListFile,
-    super.includesFlutterpiBinary,
+    super.includesEmbedderBinary,
   }) : super(id: id, name: name, displayName: displayName);
 
   final Directory directory;
@@ -66,7 +66,7 @@ class _RunningApp {
     required this.os,
   });
 
-  final FlutterpiAppBundle app;
+  final FlutterDrmBundlerAppBundle app;
   final Process sshProcess;
   final fl.DeviceLogReader logReader;
   final SshUtils sshUtils;
@@ -94,13 +94,13 @@ class _RunningApp {
     final sshStopResult = await _stopSSH(timeout: timeout);
 
     if (os.fpiHostPlatform.isWindows || !sshStopResult) {
-      // On windows, forcing ssh to allocate a PTY (so the flutter-pi process
+      // On windows, forcing ssh to allocate a PTY (so the flutter-drm-embedder process
       // receives a SIGHUP on ssh exit and quits automatically) might not always
       // work.
       //
-      // So let's just kill every flutter-pi on the remote on exit.
+      // So let's just kill every flutter-drm-embedder on the remote on exit.
       final result = await sshUtils.runSsh(
-        command: 'killall flutter-pi',
+        command: 'killall flutter-drm-embedder',
         timeout: timeout,
       );
       if (result.exitCode == 0) {
@@ -115,12 +115,12 @@ class _RunningApp {
   }
 }
 
-class FlutterpiArgs {
-  const FlutterpiArgs({
+class FlutterDrmBundlerArgs {
+  const FlutterDrmBundlerArgs({
     this.explicitDisplaySizeMillimeters,
     this.useDummyDisplay = false,
     this.dummyDisplaySize,
-    this.filesystemLayout = FilesystemLayout.flutterPi,
+    this.filesystemLayout = FilesystemLayout.flutterDrm,
   });
 
   final (int, int)? explicitDisplaySizeMillimeters;
@@ -129,15 +129,15 @@ class FlutterpiArgs {
   final FilesystemLayout filesystemLayout;
 }
 
-class FlutterpiSshDevice extends fl.Device {
-  FlutterpiSshDevice({
+class FlutterDrmBundlerSshDevice extends fl.Device {
+  FlutterDrmBundlerSshDevice({
     required String id,
     required this.name,
     required this.sshUtils,
     required String? remoteInstallPath,
     required this.logger,
     required this.os,
-    this.args = const FlutterpiArgs(),
+    this.args = const FlutterDrmBundlerArgs(),
   })  : remoteInstallPath = remoteInstallPath ?? '/tmp/',
         super(
           id,
@@ -151,29 +151,29 @@ class FlutterpiSshDevice extends fl.Device {
   final String remoteInstallPath;
   final fl.Logger logger;
   final MoreOperatingSystemUtils os;
-  final FlutterpiArgs args;
+  final FlutterDrmBundlerArgs args;
 
   final runningApps = <String, _RunningApp>{};
   final logReaders = <String, fl.CustomDeviceLogReader>{};
-  final globalLogReader = fl.CustomDeviceLogReader('FlutterPi');
+  final globalLogReader = fl.CustomDeviceLogReader('FlutterDrmEmbedder');
 
-  String _getRemoteInstallPath(FlutterpiAppBundle bundle) {
+  String _getRemoteInstallPath(FlutterDrmBundlerAppBundle bundle) {
     return path.posix.join(remoteInstallPath, bundle.id);
   }
 
   @visibleForTesting
-  Future<FlutterpiTargetPlatform> getFlutterpiTargetPlatform() async {
+  Future<FlutterDrmTargetPlatform> getFlutterDrmTargetPlatform() async {
     try {
       final result = await sshUtils.uname(args: ['-m']);
       switch (result) {
         case 'armv7l':
-          return FlutterpiTargetPlatform.genericArmV7;
+          return FlutterDrmTargetPlatform.genericArmV7;
         case 'aarch64':
-          return FlutterpiTargetPlatform.genericAArch64;
+          return FlutterDrmTargetPlatform.genericAArch64;
         case 'x86_64':
-          return FlutterpiTargetPlatform.genericX64;
+          return FlutterDrmTargetPlatform.genericX64;
         case 'riscv64':
-          return FlutterpiTargetPlatform.genericRiscv64;
+          return FlutterDrmTargetPlatform.genericRiscv64;
         default:
           fl.throwToolExit(
             'SSH device "$id" has unknown target platform. `uname -m`: $result',
@@ -184,7 +184,7 @@ class FlutterpiSshDevice extends fl.Device {
     }
   }
 
-  late final flutterpiTargetPlatform = getFlutterpiTargetPlatform();
+  late final flutterDrmTargetPlatform = getFlutterDrmTargetPlatform();
 
   @override
   fl.Category? get category => fl.Category.mobile;
@@ -225,12 +225,12 @@ class FlutterpiSshDevice extends fl.Device {
 
   @override
   Future<bool> installApp(
-    covariant FlutterpiAppBundle app, {
+    covariant FlutterDrmBundlerAppBundle app, {
     String? userIdentifier,
   }) async {
     final installDir = _getRemoteInstallPath(app);
 
-    if (app is! PrebuiltFlutterpiAppBundle) {
+    if (app is! PrebuiltFlutterDrmBundlerAppBundle) {
       fl.throwToolExit('Cannot install unbuilt app bundle "${app.id}".');
     }
 
@@ -279,7 +279,7 @@ class FlutterpiSshDevice extends fl.Device {
 
   @override
   Future<bool> isAppInstalled(
-    covariant FlutterpiAppBundle app, {
+    covariant FlutterDrmBundlerAppBundle app, {
     String? userIdentifier,
   }) async {
     return false;
@@ -289,7 +289,7 @@ class FlutterpiSshDevice extends fl.Device {
   bool get isConnected => true;
 
   @override
-  Future<bool> isLatestBuildInstalled(covariant FlutterpiAppBundle app) async {
+  Future<bool> isLatestBuildInstalled(covariant FlutterDrmBundlerAppBundle app) async {
     return false;
   }
 
@@ -325,19 +325,19 @@ class FlutterpiSshDevice extends fl.Device {
   @override
   Future<String> get sdkNameAndVersion async => 'Linux';
 
-  Future<FlutterpiAppBundle> _buildApp({
+  Future<FlutterDrmBundlerAppBundle> _buildApp({
     required String id,
     String? mainPath,
     required fl.DebuggingOptions debuggingOptions,
   }) async {
     /// TODO: This is partially duplicated.
     final host = switch (os.fpiHostPlatform) {
-      FlutterpiHostPlatform.darwinARM64 => FlutterpiHostPlatform.darwinX64,
-      FlutterpiHostPlatform.windowsARM64 => FlutterpiHostPlatform.windowsX64,
-      FlutterpiHostPlatform other => other,
+      FlutterDrmHostPlatform.darwinARM64 => FlutterDrmHostPlatform.darwinX64,
+      FlutterDrmHostPlatform.windowsARM64 => FlutterDrmHostPlatform.windowsX64,
+      FlutterDrmHostPlatform other => other,
     };
 
-    var target = await flutterpiTargetPlatform;
+    var target = await flutterDrmTargetPlatform;
     if (!target.isGeneric &&
         debuggingOptions.buildInfo.mode == fl.BuildMode.debug) {
       logger.printTrace(
@@ -348,13 +348,13 @@ class FlutterpiSshDevice extends fl.Device {
     }
 
     /// TODO: Ugly hack, fix this
-    var forceBundleFlutterpi = false;
-    if (globals.artifacts is LocalFlutterpiBinaryOverride) {
-      forceBundleFlutterpi = true;
+    var forceBundleEmbedder = false;
+    if (globals.artifacts is LocalFlutterDrmEmbedderBinaryOverride) {
+      forceBundleEmbedder = true;
     }
 
-    final artifacts = FlutterToFlutterpiArtifactsForwarder(
-      inner: globals.flutterpiArtifacts,
+    final artifacts = FlutterToFlutterDrmEmbedderArtifactsForwarder(
+      inner: globals.flutterDrmEmbedderArtifacts,
       host: host,
       target: target,
     );
@@ -367,13 +367,13 @@ class FlutterpiSshDevice extends fl.Device {
       mainPath: mainPath,
       artifacts: artifacts,
       fsLayout: args.filesystemLayout,
-      forceBundleFlutterpi: forceBundleFlutterpi,
+      forceBundleEmbedder: forceBundleEmbedder,
     );
   }
 
   @visibleForTesting
-  List<String> buildFlutterpiCommand({
-    required String flutterpiExe,
+  List<String> buildFlutterDrmBundlerCommand({
+    required String flutterDrmEmbedderExe,
     required String bundlePath,
     required fl.BuildMode runtimeMode,
     Iterable<String> engineArgs = const [],
@@ -388,7 +388,7 @@ class FlutterpiSshDevice extends fl.Device {
     };
 
     return [
-      flutterpiExe,
+      flutterDrmEmbedderExe,
       if (args.explicitDisplaySizeMillimeters
           case (final width, final height)) ...[
         '--dimensions',
@@ -497,7 +497,7 @@ class FlutterpiSshDevice extends fl.Device {
 
   @override
   Future<fl.LaunchResult> startApp(
-    covariant FlutterpiAppBundle? package, {
+    covariant FlutterDrmBundlerAppBundle? package, {
     String? mainPath,
     String? route,
     required fl.DebuggingOptions debuggingOptions,
@@ -507,8 +507,8 @@ class FlutterpiSshDevice extends fl.Device {
     String? userIdentifier,
   }) async {
     final prebuiltApp = switch (package) {
-      PrebuiltFlutterpiAppBundle prebuilt => prebuilt,
-      BuildableFlutterpiAppBundle buildable => await _buildApp(
+      PrebuiltFlutterDrmBundlerAppBundle prebuilt => prebuilt,
+      BuildableFlutterDrmBundlerAppBundle buildable => await _buildApp(
           id: buildable.id,
           mainPath: mainPath,
           debuggingOptions: debuggingOptions,
@@ -522,18 +522,18 @@ class FlutterpiSshDevice extends fl.Device {
 
     final remoteInstallPath = _getRemoteInstallPath(prebuiltApp);
 
-    // If we have a flutter-pi binary bundled, use that one to execute the app.
+    // If we have a flutter-drm-embedder binary bundled, use that one to execute the app.
     // That's usually the case.
     //
     // If `--fs-layout=meta-flutter` was specified, we can't bundle
-    // a flutter-pi binary with the app, so instead we try to execute flutter-pi
+    // a flutter-drm-embedder binary with the app, so instead we try to execute flutter-drm-embedder
     // from PATH.
     //
-    // The exception to that is when `--flutterpi-binary` was specified,
-    // in which case we DO bundle the specified flutter-pi binary and execute it.
-    final flutterpiExePath = prebuiltApp.includesFlutterpiBinary
-        ? path.posix.join(remoteInstallPath, 'flutter-pi')
-        : 'flutter-pi';
+    // The exception to that is when `--embedder-binary` was specified,
+    // in which case we DO bundle the specified flutter-drm-embedder binary and execute it.
+    final flutterDrmEmbedderExePath = prebuiltApp.includesEmbedderBinary
+        ? path.posix.join(remoteInstallPath, 'flutter-drm')
+        : 'flutter-drm';
 
     final hostPort = switch (debuggingOptions.hostVmServicePort) {
       int port => port,
@@ -561,8 +561,8 @@ class FlutterpiSshDevice extends fl.Device {
                 )
               : null;
 
-      command = buildFlutterpiCommand(
-        flutterpiExe: flutterpiExePath,
+      command = buildFlutterDrmBundlerCommand(
+        flutterDrmEmbedderExe: flutterDrmEmbedderExePath,
         bundlePath: remoteInstallPath,
         runtimeMode: debuggingOptions.buildInfo.mode,
         engineArgs: [
@@ -633,7 +633,7 @@ class FlutterpiSshDevice extends fl.Device {
           } else {
             uriCompleter.completeError(
               ProcessException(
-                flutterpiExePath,
+                flutterDrmEmbedderExePath,
                 command.skip(1).toList(),
                 'Process exited abnormally with code $exitCode',
                 exitCode,
@@ -664,7 +664,7 @@ class FlutterpiSshDevice extends fl.Device {
 
   @override
   Future<bool> stopApp(
-    covariant FlutterpiAppBundle? app, {
+    covariant FlutterDrmBundlerAppBundle? app, {
     String? userIdentifier,
   }) async {
     if (app == null) {
@@ -729,22 +729,22 @@ class FlutterpiSshDevice extends fl.Device {
 
   @override
   Future<fl.TargetPlatform> get targetPlatform async =>
-      switch (await flutterpiTargetPlatform) {
-        FlutterpiTargetPlatform.genericArmV7 ||
-        FlutterpiTargetPlatform.pi3 ||
-        FlutterpiTargetPlatform.pi4 =>
+      switch (await flutterDrmTargetPlatform) {
+        FlutterDrmTargetPlatform.genericArmV7 ||
+        FlutterDrmTargetPlatform.pi3 ||
+        FlutterDrmTargetPlatform.pi4 =>
           fl.TargetPlatform.linux_arm64,
-        FlutterpiTargetPlatform.genericRiscv64 => fl.TargetPlatform.linux_arm64,
-        FlutterpiTargetPlatform.genericAArch64 ||
-        FlutterpiTargetPlatform.pi3_64 ||
-        FlutterpiTargetPlatform.pi4_64 =>
+        FlutterDrmTargetPlatform.genericRiscv64 => fl.TargetPlatform.linux_arm64,
+        FlutterDrmTargetPlatform.genericAArch64 ||
+        FlutterDrmTargetPlatform.pi3_64 ||
+        FlutterDrmTargetPlatform.pi4_64 =>
           fl.TargetPlatform.linux_arm64,
-        FlutterpiTargetPlatform.genericX64 => fl.TargetPlatform.linux_x64,
+        FlutterDrmTargetPlatform.genericX64 => fl.TargetPlatform.linux_x64,
       };
 
   @override
   Future<bool> uninstallApp(
-    covariant FlutterpiAppBundle app, {
+    covariant FlutterDrmBundlerAppBundle app, {
     String? userIdentifier,
   }) async {
     final path = _getRemoteInstallPath(app);

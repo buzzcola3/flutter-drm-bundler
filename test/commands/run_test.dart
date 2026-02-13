@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/executable.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/build_system/build_app.dart';
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/executable.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/build_system/build_app.dart';
 import 'package:test/fake.dart';
 import 'package:test/test.dart';
 
@@ -14,15 +14,15 @@ import '../src/fake_device_manager.dart';
 import '../src/fake_flutter_version.dart';
 import '../src/fake_process_manager.dart';
 import '../src/mock_app_builder.dart';
-import '../src/mock_flutterpi_artifacts.dart';
+import '../src/mock_flutter_drm_embedder_artifacts.dart';
 import '../src/test_feature_flags.dart';
 
 void main() {
   late MemoryFileSystem fs;
   late fl.BufferLogger logger;
-  late FlutterpiToolCommandRunner runner;
+  late FlutterDrmBundlerCommandRunner runner;
   late fl.Platform platform;
-  late MockFlutterpiArtifacts flutterpiArtifacts;
+  late MockFlutterDrmEmbedderArtifacts flutterDrmEmbedderArtifacts;
   late MockAppBuilder appBuilder;
   late FakeDeviceManager deviceManager;
 
@@ -39,7 +39,7 @@ void main() {
         fl.FileSystem: () => fs,
         fl.FlutterVersion: () => FakeFlutterVersion(),
         fl.Platform: () => platform,
-        fl.Artifacts: () => flutterpiArtifacts,
+        fl.Artifacts: () => flutterDrmEmbedderArtifacts,
         AppBuilder: () => appBuilder,
         fl.FeatureFlags: () => TestFeatureFlags(),
         fl.DeviceManager: () => deviceManager,
@@ -53,9 +53,9 @@ void main() {
   setUp(() {
     fs = MemoryFileSystem.test();
     logger = fl.BufferLogger.test();
-    runner = createFlutterpiCommandRunner();
+    runner = createFlutterDrmBundlerCommandRunner();
     platform = fl.FakePlatform();
-    flutterpiArtifacts = MockFlutterpiArtifacts();
+    flutterDrmEmbedderArtifacts = MockFlutterDrmEmbedderArtifacts();
     appBuilder = MockAppBuilder();
     deviceManager = FakeDeviceManager();
 

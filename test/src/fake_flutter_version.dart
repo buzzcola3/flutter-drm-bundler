@@ -5,7 +5,7 @@
 // Extraced from: https://github.com/flutter/flutter/blob/master/packages/flutter_tools/test/src/fakes.dart
 
 import 'package:file/file.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fltool;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fltool;
 
 class FakeFlutterVersion implements fltool.FlutterVersion {
   FakeFlutterVersion({

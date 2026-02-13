@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
-import 'package:flutterpi_tool/src/config.dart';
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/config.dart';
 
 String pluralize(String word, int count) => count == 1 ? word : '${word}s';
 
-class FlutterpiToolDevicesCommandOutput {
-  factory FlutterpiToolDevicesCommandOutput({
+class FlutterDrmBundlerDevicesCommandOutput {
+  factory FlutterDrmBundlerDevicesCommandOutput({
     required Platform platform,
     required Logger logger,
     DeviceManager? deviceManager,
@@ -18,14 +18,14 @@ class FlutterpiToolDevicesCommandOutput {
     DeviceConnectionInterface? deviceConnectionInterface,
   }) {
     if (platform.isMacOS) {
-      return FlutterpiToolDevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
+      return FlutterDrmBundlerDevicesCommandOutputWithExtendedWirelessDeviceDiscovery(
         logger: logger,
         deviceManager: deviceManager,
         deviceDiscoveryTimeout: deviceDiscoveryTimeout,
         deviceConnectionInterface: deviceConnectionInterface,
       );
     }
-    return FlutterpiToolDevicesCommandOutput._private(
+    return FlutterDrmBundlerDevicesCommandOutput._private(
       logger: logger,
       deviceManager: deviceManager,
       deviceDiscoveryTimeout: deviceDiscoveryTimeout,
@@ -33,7 +33,7 @@ class FlutterpiToolDevicesCommandOutput {
     );
   }
 
-  FlutterpiToolDevicesCommandOutput._private({
+  FlutterDrmBundlerDevicesCommandOutput._private({
     required Logger logger,
     required DeviceManager? deviceManager,
     required this.deviceDiscoveryTimeout,
@@ -129,7 +129,7 @@ class FlutterpiToolDevicesCommandOutput {
       }
     }
     status.write(
-      'If you expected ${foundAny ? 'another' : 'a'} device to be detected, try increasing the time to wait for connected devices by using the "flutterpi_tool devices list" command with the "--${FlutterOptions.kDeviceTimeout}" flag.',
+      'If you expected ${foundAny ? 'another' : 'a'} device to be detected, try increasing the time to wait for connected devices by using the "flutter_drm_bundler devices list" command with the "--${FlutterOptions.kDeviceTimeout}" flag.',
     );
     _logger.printStatus(status.toString());
   }
@@ -148,9 +148,9 @@ const String _noAttachedCheckForWireless =
     'No devices found yet. Checking for wireless devices...';
 const String _noWirelessDevicesFoundMessage = 'No wireless devices were found.';
 
-class FlutterpiToolDevicesCommandOutputWithExtendedWirelessDeviceDiscovery
-    extends FlutterpiToolDevicesCommandOutput {
-  FlutterpiToolDevicesCommandOutputWithExtendedWirelessDeviceDiscovery({
+class FlutterDrmBundlerDevicesCommandOutputWithExtendedWirelessDeviceDiscovery
+    extends FlutterDrmBundlerDevicesCommandOutput {
+  FlutterDrmBundlerDevicesCommandOutputWithExtendedWirelessDeviceDiscovery({
     required super.logger,
     super.deviceManager,
     super.deviceDiscoveryTimeout,
@@ -305,7 +305,7 @@ class FixCommandDiagnostic extends Diagnostic {
   }
 }
 
-class DevicesCommand extends FlutterpiCommand {
+class DevicesCommand extends FlutterDrmBundlerCommand {
   DevicesCommand({bool verboseHelp = false}) {
     addSubcommand(DevicesAddCommand());
     addSubcommand(DevicesRemoveCommand());
@@ -313,7 +313,7 @@ class DevicesCommand extends FlutterpiCommand {
   }
 
   @override
-  String get description => 'List & manage flutterpi_tool devices.';
+  String get description => 'List & manage flutter_drm_bundler devices.';
 
   @override
   final String category = FlutterCommandCategory.tools;
@@ -335,14 +335,14 @@ class DevicesCommand extends FlutterpiCommand {
   }
 }
 
-class DevicesListCommand extends FlutterpiCommand {
+class DevicesListCommand extends FlutterDrmBundlerCommand {
   DevicesListCommand() {
     usesDeviceTimeoutOption();
     usesDeviceConnectionOption();
   }
 
   @override
-  String get description => 'List flutterpi_tool device.';
+  String get description => 'List flutter_drm_bundler device.';
 
   @override
   String get name => 'list';
@@ -356,7 +356,7 @@ class DevicesListCommand extends FlutterpiCommand {
       );
     }
 
-    final output = FlutterpiToolDevicesCommandOutput(
+    final output = FlutterDrmBundlerDevicesCommandOutput(
       platform: globals.platform,
       logger: globals.logger,
       deviceManager: globals.deviceManager,
@@ -370,7 +370,7 @@ class DevicesListCommand extends FlutterpiCommand {
   }
 }
 
-class DevicesAddCommand extends FlutterpiCommand {
+class DevicesAddCommand extends FlutterDrmBundlerCommand {
   DevicesAddCommand() {
     argParser.addOption(
       'type',
@@ -413,13 +413,13 @@ class DevicesAddCommand extends FlutterpiCommand {
   }
 
   @override
-  String get description => 'Add a new flutterpi_tool device.';
+  String get description => 'Add a new flutter_drm_bundler device.';
 
   @override
   String get name => 'add';
 
   @override
-  String get invocation => 'flutterpi_tool devices add <[user@]hostname>';
+  String get invocation => 'flutter_drm_bundler devices add <[user@]hostname>';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -438,9 +438,9 @@ class DevicesAddCommand extends FlutterpiCommand {
     final fsLayout = filesystemLayout;
     final displaySize = this.displaySize;
 
-    final flutterpiToolConfig = globals.flutterPiToolConfig;
-    if (flutterpiToolConfig.containsDevice(id)) {
-      globals.printError('flutterpi_tool device with id "$id" already exists.');
+    final flutterDrmBundlerConfig = globals.flutterDrmBundlerConfig;
+    if (flutterDrmBundlerConfig.containsDevice(id)) {
+      globals.printError('flutter_drm_bundler device with id "$id" already exists.');
       return FlutterCommandResult.fail();
     }
 
@@ -490,7 +490,7 @@ class DevicesAddCommand extends FlutterpiCommand {
       }
     }
 
-    globals.flutterPiToolConfig.addDevice(
+    globals.flutterDrmBundlerConfig.addDevice(
       DeviceConfigEntry(
         id: id,
         sshExecutable: sshExecutable,
@@ -517,13 +517,13 @@ class DevicesAddCommand extends FlutterpiCommand {
   }
 }
 
-class DevicesRemoveCommand extends FlutterpiCommand {
+class DevicesRemoveCommand extends FlutterDrmBundlerCommand {
   DevicesRemoveCommand() {
     usesSshRemoteNonOptionArg();
   }
 
   @override
-  String get description => 'Remove a flutterpi_tool device.';
+  String get description => 'Remove a flutter_drm_bundler device.';
 
   @override
   String get name => 'remove';
@@ -535,14 +535,14 @@ class DevicesRemoveCommand extends FlutterpiCommand {
   Future<FlutterCommandResult> runCommand() async {
     final id = sshHostname;
 
-    final flutterpiToolConfig = globals.flutterPiToolConfig;
+    final flutterDrmBundlerConfig = globals.flutterDrmBundlerConfig;
 
-    if (!flutterpiToolConfig.containsDevice(id)) {
-      globals.printError('No flutterpi_tool device with id "$id" found.');
+    if (!flutterDrmBundlerConfig.containsDevice(id)) {
+      globals.printError('No flutter_drm_bundler device with id "$id" found.');
       return FlutterCommandResult.fail();
     }
 
-    flutterpiToolConfig.removeDevice(id);
+    flutterDrmBundlerConfig.removeDevice(id);
     return FlutterCommandResult.success();
   }
 }

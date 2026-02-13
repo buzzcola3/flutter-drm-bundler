@@ -1,21 +1,21 @@
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 
-class PrecacheCommand extends FlutterpiCommand {
+class PrecacheCommand extends FlutterDrmBundlerCommand {
   @override
   String get name => 'precache';
 
   @override
   String get description =>
-      'Populate the flutterpi_tool\'s cache of binary artifacts.';
+      'Populate the flutter_drm_bundler\'s cache of binary artifacts.';
 
   @override
-  final String category = 'Flutter-Pi Tool';
+  final String category = 'Flutter DRM Bundler';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -27,17 +27,17 @@ class PrecacheCommand extends FlutterpiCommand {
     };
 
     final host = switch (os.fpiHostPlatform) {
-      FlutterpiHostPlatform.windowsARM64 => FlutterpiHostPlatform.windowsX64,
-      FlutterpiHostPlatform.darwinARM64 => FlutterpiHostPlatform.darwinX64,
-      FlutterpiHostPlatform other => other
+      FlutterDrmHostPlatform.windowsARM64 => FlutterDrmHostPlatform.windowsX64,
+      FlutterDrmHostPlatform.darwinARM64 => FlutterDrmHostPlatform.darwinX64,
+      FlutterDrmHostPlatform other => other
     };
 
-    // update the cached flutter-pi artifacts
-    await flutterpiCache.updateAll(
+    // update the cached flutter-drm-embedder artifacts
+    await flutterDrmBundlerCache.updateAll(
       const {DevelopmentArtifact.universal},
       offline: false,
       host: host,
-      flutterpiPlatforms: FlutterpiTargetPlatform.values.toSet(),
+      flutterDrmPlatforms: FlutterDrmTargetPlatform.values.toSet(),
       engineFlavors: EngineFlavor.values.toSet(),
       includeDebugSymbols: true,
     );

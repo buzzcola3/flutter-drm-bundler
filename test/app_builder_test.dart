@@ -1,27 +1,27 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
-import 'package:flutterpi_tool/src/build_system/targets.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/build_system/targets.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
-import 'package:flutterpi_tool/src/build_system/build_app.dart';
+import 'package:flutter_drm_bundler/src/build_system/build_app.dart';
 
 import 'src/context.dart';
 import 'src/fake_flutter_version.dart';
 import 'src/fake_os_utils.dart';
 import 'src/fake_process_manager.dart';
 import 'src/mock_build_system.dart';
-import 'src/mock_flutterpi_artifacts.dart';
+import 'src/mock_flutter_drm_embedder_artifacts.dart';
 
 void main() {
   late MemoryFileSystem fs;
   late fl.BufferLogger logger;
   late fl.Platform platform;
-  late MockFlutterpiArtifacts flutterpiArtifacts;
+  late MockFlutterDrmEmbedderArtifacts flutterDrmEmbedderArtifacts;
   late MockBuildSystem buildSystem;
   late FakeMoreOperatingSystemUtils moreOs;
   late AppBuilder appBuilder;
@@ -39,7 +39,7 @@ void main() {
         fl.FileSystem: () => fs,
         fl.FlutterVersion: () => FakeFlutterVersion(),
         fl.Platform: () => platform,
-        fl.Artifacts: () => flutterpiArtifacts,
+        fl.Artifacts: () => flutterDrmEmbedderArtifacts,
         fl.BuildSystem: () => buildSystem,
         ...overrides,
       },
@@ -50,7 +50,7 @@ void main() {
     fs = MemoryFileSystem.test();
     logger = fl.BufferLogger.test();
     platform = fl.FakePlatform();
-    flutterpiArtifacts = MockFlutterpiArtifacts();
+    flutterDrmEmbedderArtifacts = MockFlutterDrmEmbedderArtifacts();
     buildSystem = MockBuildSystem();
     moreOs = FakeMoreOperatingSystemUtils();
     appBuilder = AppBuilder(
@@ -72,17 +72,17 @@ void main() {
 
     await _runInTestContext(
       () async => await appBuilder.build(
-        host: FlutterpiHostPlatform.linuxRV64,
-        target: FlutterpiTargetPlatform.genericArmV7,
+        host: FlutterDrmHostPlatform.linuxRV64,
+        target: FlutterDrmTargetPlatform.genericArmV7,
         buildInfo: fl.BuildInfo.debug,
-        fsLayout: FilesystemLayout.flutterPi,
+        fsLayout: FilesystemLayout.flutterDrm,
       ),
     );
 
     expect(buildWasCalled, isTrue);
   });
 
-  test('passes flutterpi target platform correctly', () async {
+  test('passes flutter-drm target platform correctly', () async {
     var buildWasCalled = false;
     buildSystem.buildFn = (
       fl.Target target,
@@ -90,12 +90,12 @@ void main() {
       fl.BuildSystemConfig buildSystemConfig = const fl.BuildSystemConfig(),
     }) async {
       expect(
-        environment.defines['flutterpi-target'],
+        environment.defines['flutter-drm-target'],
         equals('riscv64-generic'),
       );
       expect(
-        (target as DebugBundleFlutterpiAssets).target,
-        equals(FlutterpiTargetPlatform.genericRiscv64),
+        (target as DebugBundleFlutterDrmAssets).target,
+        equals(FlutterDrmTargetPlatform.genericRiscv64),
       );
 
       buildWasCalled = true;
@@ -104,10 +104,10 @@ void main() {
 
     await _runInTestContext(
       () async => await appBuilder.build(
-        host: FlutterpiHostPlatform.linuxRV64,
-        target: FlutterpiTargetPlatform.genericRiscv64,
+        host: FlutterDrmHostPlatform.linuxRV64,
+        target: FlutterDrmTargetPlatform.genericRiscv64,
         buildInfo: fl.BuildInfo.debug,
-        fsLayout: FilesystemLayout.flutterPi,
+        fsLayout: FilesystemLayout.flutterDrm,
       ),
     );
 
@@ -123,7 +123,7 @@ void main() {
     }) async {
       expect(
         environment.defines[fl.kTargetFile],
-        equals('lib/main_flutterpi.dart'),
+        equals('lib/main_flutter_drm.dart'),
       );
 
       buildWasCalled = true;
@@ -132,11 +132,11 @@ void main() {
 
     await _runInTestContext(
       () async => await appBuilder.build(
-        host: FlutterpiHostPlatform.linuxRV64,
-        target: FlutterpiTargetPlatform.genericRiscv64,
+        host: FlutterDrmHostPlatform.linuxRV64,
+        target: FlutterDrmTargetPlatform.genericRiscv64,
         buildInfo: fl.BuildInfo.debug,
-        fsLayout: FilesystemLayout.flutterPi,
-        mainPath: 'lib/main_flutterpi.dart',
+        fsLayout: FilesystemLayout.flutterDrm,
+        mainPath: 'lib/main_flutter_drm.dart',
       ),
     );
 
@@ -165,7 +165,7 @@ void main() {
           );
 
           expect(
-            subTargets.whereType<CopyFlutterpiEngine>().single.layout,
+            subTargets.whereType<CopyFlutterDrmEngine>().single.layout,
             equals(FilesystemLayout.metaFlutter),
           );
 
@@ -175,8 +175,8 @@ void main() {
 
         await _runInTestContext(
           () async => await appBuilder.build(
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
             fsLayout: FilesystemLayout.metaFlutter,
           ),
@@ -186,7 +186,7 @@ void main() {
       });
 
       test(
-          'does not bundle a flutterpi binary if forceBundleFlutterpi is not passed',
+          'does not bundle an embedder binary if forceBundleEmbedder is not passed',
           () async {
         var buildWasCalled = false;
         buildSystem.buildFn = (
@@ -197,7 +197,7 @@ void main() {
           final subTargets = (target as fl.CompositeTarget).dependencies;
 
           expect(
-            subTargets.whereType<CopyFlutterpiBinary>(),
+            subTargets.whereType<CopyFlutterDrmEmbedderBinary>(),
             isEmpty,
           );
 
@@ -208,19 +208,19 @@ void main() {
         final bundle = await _runInTestContext(
           () async => await appBuilder.buildBundle(
             id: 'test-id',
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
             fsLayout: FilesystemLayout.metaFlutter,
-            forceBundleFlutterpi: false,
+            forceBundleEmbedder: false,
           ),
         );
 
         expect(buildWasCalled, isTrue);
-        expect(bundle.includesFlutterpiBinary, isFalse);
+        expect(bundle.includesEmbedderBinary, isFalse);
       });
 
-      test('does bundle a flutterpi binary if forceBundleFlutterpi is passed',
+      test('does bundle an embedder binary if forceBundleEmbedder is passed',
           () async {
         var buildWasCalled = false;
         buildSystem.buildFn = (
@@ -231,12 +231,12 @@ void main() {
           final subTargets = (target as fl.CompositeTarget).dependencies;
 
           expect(
-            subTargets.whereType<CopyFlutterpiBinary>(),
+            subTargets.whereType<CopyFlutterDrmEmbedderBinary>(),
             hasLength(1),
           );
 
           expect(
-            subTargets.whereType<CopyFlutterpiBinary>().single.layout,
+            subTargets.whereType<CopyFlutterDrmEmbedderBinary>().single.layout,
             equals(FilesystemLayout.metaFlutter),
           );
 
@@ -247,16 +247,16 @@ void main() {
         final bundle = await _runInTestContext(
           () async => await appBuilder.buildBundle(
             id: 'test-id',
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
             fsLayout: FilesystemLayout.metaFlutter,
-            forceBundleFlutterpi: true,
+            forceBundleEmbedder: true,
           ),
         );
 
         expect(buildWasCalled, isTrue);
-        expect(bundle.includesFlutterpiBinary, isTrue);
+        expect(bundle.includesEmbedderBinary, isTrue);
       });
 
       test('default output directory is build/<target>-meta-flutter', () async {
@@ -268,7 +268,7 @@ void main() {
         }) async {
           expect(
             environment.outputDir.path,
-            equals('build/flutter-pi/meta-flutter-riscv64-generic'),
+            equals('build/flutter-drm/meta-flutter-riscv64-generic'),
           );
 
           buildWasCalled = true;
@@ -278,11 +278,11 @@ void main() {
         await _runInTestContext(
           () async => await appBuilder.buildBundle(
             id: 'test-id',
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
             fsLayout: FilesystemLayout.metaFlutter,
-            forceBundleFlutterpi: true,
+            forceBundleEmbedder: true,
           ),
         );
 
@@ -290,8 +290,8 @@ void main() {
       });
     });
 
-    group('flutter-pi', () {
-      test('creates targets with flutter-pi layout', () async {
+    group('flutter-drm', () {
+      test('creates targets with flutter-drm layout', () async {
         var buildWasCalled = false;
         buildSystem.buildFn = (
           fl.Target target,
@@ -302,17 +302,17 @@ void main() {
 
           expect(
             subTargets.whereType<CopyFlutterAssets>().single.layout,
-            equals(FilesystemLayout.flutterPi),
+            equals(FilesystemLayout.flutterDrm),
           );
 
           expect(
             subTargets.whereType<CopyIcudtl>().single.layout,
-            equals(FilesystemLayout.flutterPi),
+            equals(FilesystemLayout.flutterDrm),
           );
 
           expect(
-            subTargets.whereType<CopyFlutterpiEngine>().single.layout,
-            equals(FilesystemLayout.flutterPi),
+            subTargets.whereType<CopyFlutterDrmEngine>().single.layout,
+            equals(FilesystemLayout.flutterDrm),
           );
 
           buildWasCalled = true;
@@ -321,17 +321,17 @@ void main() {
 
         await _runInTestContext(
           () async => await appBuilder.build(
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
-            fsLayout: FilesystemLayout.flutterPi,
+            fsLayout: FilesystemLayout.flutterDrm,
           ),
         );
 
         expect(buildWasCalled, isTrue);
       });
 
-      test('always bundles a flutterpi binary', () async {
+      test('always bundles an embedder binary', () async {
         var buildWasCalled = false;
         buildSystem.buildFn = (
           fl.Target target,
@@ -341,13 +341,13 @@ void main() {
           final subTargets = (target as fl.CompositeTarget).dependencies;
 
           expect(
-            subTargets.whereType<CopyFlutterpiBinary>(),
+            subTargets.whereType<CopyFlutterDrmEmbedderBinary>(),
             hasLength(1),
           );
 
           expect(
-            subTargets.whereType<CopyFlutterpiBinary>().single.layout,
-            equals(FilesystemLayout.flutterPi),
+            subTargets.whereType<CopyFlutterDrmEmbedderBinary>().single.layout,
+            equals(FilesystemLayout.flutterDrm),
           );
 
           buildWasCalled = true;
@@ -356,10 +356,10 @@ void main() {
 
         await _runInTestContext(
           () async => await appBuilder.build(
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
-            fsLayout: FilesystemLayout.flutterPi,
+            fsLayout: FilesystemLayout.flutterDrm,
           ),
         );
 
@@ -375,7 +375,7 @@ void main() {
         }) async {
           expect(
             environment.outputDir.path,
-            equals('build/flutter-pi/riscv64-generic'),
+            equals('build/flutter-drm/riscv64-generic'),
           );
 
           buildWasCalled = true;
@@ -385,11 +385,11 @@ void main() {
         await _runInTestContext(
           () async => await appBuilder.buildBundle(
             id: 'test-id',
-            host: FlutterpiHostPlatform.linuxRV64,
-            target: FlutterpiTargetPlatform.genericRiscv64,
+            host: FlutterDrmHostPlatform.linuxRV64,
+            target: FlutterDrmTargetPlatform.genericRiscv64,
             buildInfo: fl.BuildInfo.debug,
-            fsLayout: FilesystemLayout.flutterPi,
-            forceBundleFlutterpi: true,
+            fsLayout: FilesystemLayout.flutterDrm,
+            forceBundleEmbedder: true,
           ),
         );
 
@@ -410,7 +410,7 @@ void main() {
 
         expect(
           subTargets
-              .whereType<CopyFlutterpiEngine>()
+              .whereType<CopyFlutterDrmEngine>()
               .single
               .includeDebugSymbols,
           isTrue,
@@ -422,10 +422,10 @@ void main() {
 
       await _runInTestContext(
         () async => await appBuilder.build(
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
-          fsLayout: FilesystemLayout.flutterPi,
+          fsLayout: FilesystemLayout.flutterDrm,
           includeDebugSymbols: true,
         ),
       );
@@ -444,7 +444,7 @@ void main() {
 
         expect(
           subTargets
-              .whereType<CopyFlutterpiEngine>()
+              .whereType<CopyFlutterDrmEngine>()
               .single
               .includeDebugSymbols,
           isFalse,
@@ -456,10 +456,10 @@ void main() {
 
       await _runInTestContext(
         () async => await appBuilder.build(
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
-          fsLayout: FilesystemLayout.flutterPi,
+          fsLayout: FilesystemLayout.flutterDrm,
           includeDebugSymbols: false,
         ),
       );
@@ -469,7 +469,7 @@ void main() {
   });
 
   group('bundle binaries', () {
-    test('binary paths for --fs-layout=flutter-pi', () async {
+    test('binary paths for --fs-layout=flutter-drm', () async {
       buildSystem.buildFn = (
         fl.Target target,
         fl.Environment environment, {
@@ -481,27 +481,27 @@ void main() {
       final bundle = await _runInTestContext(
         () async => await appBuilder.buildBundle(
           id: 'test-id',
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
-          fsLayout: FilesystemLayout.flutterPi,
-          forceBundleFlutterpi: false,
+          fsLayout: FilesystemLayout.flutterDrm,
+          forceBundleEmbedder: false,
         ),
-      ) as PrebuiltFlutterpiAppBundle;
+      ) as PrebuiltFlutterDrmBundlerAppBundle;
 
       expect(
         bundle.binaries.map(
           (file) =>
-              p.relative(file.path, from: 'build/flutter-pi/riscv64-generic'),
+              p.relative(file.path, from: 'build/flutter-drm/riscv64-generic'),
         ),
         unorderedEquals([
-          'flutter-pi',
+          'flutter-drm',
           'libflutter_engine.so',
         ]),
       );
     });
 
-    test('binary paths for --fs-layout=flutter-pi and include debug symbols',
+    test('binary paths for --fs-layout=flutter-drm and include debug symbols',
         () async {
       buildSystem.buildFn = (
         fl.Target target,
@@ -514,22 +514,22 @@ void main() {
       final bundle = await _runInTestContext(
         () async => await appBuilder.buildBundle(
           id: 'test-id',
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
-          fsLayout: FilesystemLayout.flutterPi,
+          fsLayout: FilesystemLayout.flutterDrm,
           includeDebugSymbols: true,
-          forceBundleFlutterpi: false,
+          forceBundleEmbedder: false,
         ),
-      ) as PrebuiltFlutterpiAppBundle;
+      ) as PrebuiltFlutterDrmBundlerAppBundle;
 
       expect(
         bundle.binaries.map(
           (file) =>
-              p.relative(file.path, from: 'build/flutter-pi/riscv64-generic'),
+              p.relative(file.path, from: 'build/flutter-drm/riscv64-generic'),
         ),
         unorderedEquals([
-          'flutter-pi',
+          'flutter-drm',
           'libflutter_engine.dbgsyms',
           'libflutter_engine.so',
         ]),
@@ -548,19 +548,19 @@ void main() {
       final bundle = await _runInTestContext(
         () async => await appBuilder.buildBundle(
           id: 'test-id',
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
           fsLayout: FilesystemLayout.metaFlutter,
-          forceBundleFlutterpi: false,
+          forceBundleEmbedder: false,
         ),
-      ) as PrebuiltFlutterpiAppBundle;
+      ) as PrebuiltFlutterDrmBundlerAppBundle;
 
       expect(
         bundle.binaries.map(
           (file) => p.relative(
             file.path,
-            from: 'build/flutter-pi/meta-flutter-riscv64-generic',
+            from: 'build/flutter-drm/meta-flutter-riscv64-generic',
           ),
         ),
         unorderedEquals([
@@ -570,7 +570,7 @@ void main() {
     });
 
     test(
-        'binary paths for --fs-layout=meta-flutter with force bundle flutterpi',
+        'binary paths for --fs-layout=meta-flutter with force bundle embedder',
         () async {
       buildSystem.buildFn = (
         fl.Target target,
@@ -583,23 +583,23 @@ void main() {
       final bundle = await _runInTestContext(
         () async => await appBuilder.buildBundle(
           id: 'test-id',
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
           fsLayout: FilesystemLayout.metaFlutter,
-          forceBundleFlutterpi: true,
+          forceBundleEmbedder: true,
         ),
-      ) as PrebuiltFlutterpiAppBundle;
+      ) as PrebuiltFlutterDrmBundlerAppBundle;
 
       expect(
         bundle.binaries.map(
           (file) => p.relative(
             file.path,
-            from: 'build/flutter-pi/meta-flutter-riscv64-generic',
+            from: 'build/flutter-drm/meta-flutter-riscv64-generic',
           ),
         ),
         unorderedEquals([
-          'bin/flutter-pi',
+          'bin/flutter-drm-embedder',
           'lib/libflutter_engine.so',
         ]),
       );
@@ -618,20 +618,20 @@ void main() {
       final bundle = await _runInTestContext(
         () async => await appBuilder.buildBundle(
           id: 'test-id',
-          host: FlutterpiHostPlatform.linuxRV64,
-          target: FlutterpiTargetPlatform.genericRiscv64,
+          host: FlutterDrmHostPlatform.linuxRV64,
+          target: FlutterDrmTargetPlatform.genericRiscv64,
           buildInfo: fl.BuildInfo.debug,
           fsLayout: FilesystemLayout.metaFlutter,
           includeDebugSymbols: true,
-          forceBundleFlutterpi: false,
+          forceBundleEmbedder: false,
         ),
-      ) as PrebuiltFlutterpiAppBundle;
+      ) as PrebuiltFlutterDrmBundlerAppBundle;
 
       expect(
         bundle.binaries.map(
           (file) => p.relative(
             file.path,
-            from: 'build/flutter-pi/meta-flutter-riscv64-generic',
+            from: 'build/flutter-drm/meta-flutter-riscv64-generic',
           ),
         ),
         unorderedEquals([

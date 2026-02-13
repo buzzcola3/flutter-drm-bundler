@@ -3,15 +3,15 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 
 import '../../common.dart';
 
-class BuildCommand extends FlutterpiCommand {
+class BuildCommand extends FlutterDrmBundlerCommand {
   static const archs = ['arm', 'arm64', 'x64', 'riscv64'];
 
   static const cpus = ['generic', 'pi3', 'pi4'];
@@ -36,7 +36,7 @@ class BuildCommand extends FlutterpiCommand {
     // add --dart-define, --dart-define-from-file options
     usesDartDefineOption();
     usesTargetOption();
-    usesLocalFlutterpiExecutableArg(verboseHelp: verboseHelp);
+    usesLocalEmbedderExecutableArg(verboseHelp: verboseHelp);
     usesFilesystemLayoutArg(verboseHelp: verboseHelp);
 
     argParser
@@ -76,14 +76,14 @@ class BuildCommand extends FlutterpiCommand {
   String get name => 'build';
 
   @override
-  String get description => 'Builds a flutter-pi asset bundle.';
+  String get description => 'Builds a flutter-drm-embedder asset bundle.';
 
   @override
   String get category => FlutterCommandCategory.project;
 
   @override
-  FlutterpiToolCommandRunner? get runner =>
-      super.runner as FlutterpiToolCommandRunner;
+  FlutterDrmBundlerCommandRunner? get runner =>
+      super.runner as FlutterDrmBundlerCommandRunner;
 
   EngineFlavor get defaultFlavor => EngineFlavor.debug;
 
@@ -100,16 +100,16 @@ class BuildCommand extends FlutterpiCommand {
     return exitCode;
   }
 
-  FlutterpiTargetPlatform getTargetPlatform() {
+  FlutterDrmTargetPlatform getTargetPlatform() {
     return switch ((stringArg('arch'), stringArg('cpu'))) {
-      ('arm', 'generic') => FlutterpiTargetPlatform.genericArmV7,
-      ('arm', 'pi3') => FlutterpiTargetPlatform.pi3,
-      ('arm', 'pi4') => FlutterpiTargetPlatform.pi4,
-      ('arm64', 'generic') => FlutterpiTargetPlatform.genericAArch64,
-      ('arm64', 'pi3') => FlutterpiTargetPlatform.pi3_64,
-      ('arm64', 'pi4') => FlutterpiTargetPlatform.pi4_64,
-      ('x64', 'generic') => FlutterpiTargetPlatform.genericX64,
-      ('riscv64', 'generic') => FlutterpiTargetPlatform.genericRiscv64,
+      ('arm', 'generic') => FlutterDrmTargetPlatform.genericArmV7,
+      ('arm', 'pi3') => FlutterDrmTargetPlatform.pi3,
+      ('arm', 'pi4') => FlutterDrmTargetPlatform.pi4,
+      ('arm64', 'generic') => FlutterDrmTargetPlatform.genericAArch64,
+      ('arm64', 'pi3') => FlutterDrmTargetPlatform.pi3_64,
+      ('arm64', 'pi4') => FlutterDrmTargetPlatform.pi4_64,
+      ('x64', 'generic') => FlutterDrmTargetPlatform.genericX64,
+      ('riscv64', 'generic') => FlutterDrmTargetPlatform.genericRiscv64,
       (final arch, final cpu) => throw UsageException(
           'Unsupported target arch & cpu combination: architecture "$arch" is not supported for cpu "$cpu"',
           usage,
@@ -128,9 +128,9 @@ class BuildCommand extends FlutterpiCommand {
 
     // for windows arm64, darwin arm64, we just use the x64 variant
     final host = switch (os.fpiHostPlatform) {
-      FlutterpiHostPlatform.windowsARM64 => FlutterpiHostPlatform.windowsX64,
-      FlutterpiHostPlatform.darwinARM64 => FlutterpiHostPlatform.darwinX64,
-      FlutterpiHostPlatform other => other
+      FlutterDrmHostPlatform.windowsARM64 => FlutterDrmHostPlatform.windowsX64,
+      FlutterDrmHostPlatform.darwinARM64 => FlutterDrmHostPlatform.darwinX64,
+      FlutterDrmHostPlatform other => other
     };
 
     var targetPlatform = getTargetPlatform();
@@ -144,29 +144,29 @@ class BuildCommand extends FlutterpiCommand {
       targetPlatform = targetPlatform.genericVariant;
     }
 
-    // update the cached flutter-pi artifacts
-    await flutterpiCache.updateAll(
+    // update the cached flutter-drm-embedder artifacts
+    await flutterDrmBundlerCache.updateAll(
       const {DevelopmentArtifact.universal},
       host: host,
       offline: false,
-      flutterpiPlatforms: {targetPlatform, targetPlatform.genericVariant},
+      flutterDrmPlatforms: {targetPlatform, targetPlatform.genericVariant},
       runtimeModes: {buildMode},
       engineFlavors: {flavor},
       includeDebugSymbols: debugSymbols,
     );
 
-    FlutterpiArtifacts artifacts = FlutterToFlutterpiArtifactsForwarder(
-      inner: globals.flutterpiArtifacts,
+    FlutterDrmEmbedderArtifacts artifacts = FlutterToFlutterDrmEmbedderArtifactsForwarder(
+      inner: globals.flutterDrmEmbedderArtifacts,
       host: host,
       target: targetPlatform,
     );
-    var forceBundleFlutterpi = false;
-    if (getLocalFlutterpiExecutable() case File file) {
-      artifacts = LocalFlutterpiBinaryOverride(
+    var forceBundleEmbedder = false;
+    if (getLocalEmbedderExecutable() case File file) {
+      artifacts = LocalFlutterDrmEmbedderBinaryOverride(
         inner: artifacts,
-        flutterpiBinary: file,
+        flutterDrmEmbedderBinary: file,
       );
-      forceBundleFlutterpi = true;
+      forceBundleEmbedder = true;
     }
 
     // actually build the flutter bundle
@@ -183,7 +183,7 @@ class BuildCommand extends FlutterpiCommand {
       includeDebugSymbols: debugSymbols,
 
       fsLayout: filesystemLayout,
-      forceBundleFlutterpi: forceBundleFlutterpi,
+      forceBundleEmbedder: forceBundleEmbedder,
     );
 
     return FlutterCommandResult.success();

@@ -1,4 +1,4 @@
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
 import 'package:test/fake.dart';
 
 class FakeAndroidLicenseValidator extends Fake

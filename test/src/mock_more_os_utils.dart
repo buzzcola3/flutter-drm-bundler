@@ -3,14 +3,14 @@ import 'package:file/src/interface/directory.dart';
 import 'package:file/src/interface/file.dart';
 import 'package:file/src/interface/file_system_entity.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:test/expect.dart';
 
 class MockMoreOperatingSystemUtils implements MoreOperatingSystemUtils {
   MockMoreOperatingSystemUtils({
     this.hostPlatform = HostPlatform.linux_x64,
-    this.fpiHostPlatform = FlutterpiHostPlatform.linuxX64,
+    this.fpiHostPlatform = FlutterDrmHostPlatform.linuxX64,
     this.name = 'test',
     this.pathVarSeparator = '/',
   })  : chmodFn = ((_, __) {}),
@@ -29,7 +29,7 @@ class MockMoreOperatingSystemUtils implements MoreOperatingSystemUtils {
 
   MockMoreOperatingSystemUtils.empty({
     this.hostPlatform = HostPlatform.linux_x64,
-    this.fpiHostPlatform = FlutterpiHostPlatform.linuxX64,
+    this.fpiHostPlatform = FlutterDrmHostPlatform.linuxX64,
     this.name = 'test',
     this.pathVarSeparator = '/',
   });
@@ -55,7 +55,7 @@ class MockMoreOperatingSystemUtils implements MoreOperatingSystemUtils {
   }
 
   @override
-  FlutterpiHostPlatform fpiHostPlatform = FlutterpiHostPlatform.linuxX64;
+  FlutterDrmHostPlatform fpiHostPlatform = FlutterDrmHostPlatform.linuxX64;
 
   int? Function(Directory directory)? getDirectorySizeFn;
 

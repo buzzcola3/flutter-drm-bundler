@@ -6,16 +6,16 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutterpi_tool/src/build_system/build_app.dart';
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/config.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
-import 'package:flutterpi_tool/src/github.dart';
+import 'package:flutter_drm_bundler/src/build_system/build_app.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/config.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/github.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 import 'package:test/test.dart' as test;
 
-import 'package:flutterpi_tool/src/fltool/common.dart' as fltool;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fltool;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 
 import '../fake_github.dart';
 import 'fake_doctor.dart';
@@ -100,8 +100,8 @@ Future<V> runInThrowingContext<V>(
       fltool.XcodeProjectInterpreter: () =>
           fail(fltool.XcodeProjectInterpreter),
 
-      // flutterpi_tool globals
-      FlutterPiToolConfig: () => fail(FlutterPiToolConfig),
+      // flutter_drm_bundler globals
+      FlutterDrmBundlerConfig: () => fail(FlutterDrmBundlerConfig),
       SshUtils: () => fail(SshUtils),
       AppBuilder: () => fail(AppBuilder),
     },
@@ -133,7 +133,7 @@ Future<V> runInTestContext<V>(
       fltool.Cache: () {
         final fs = globals.fs;
         fltool.Cache.flutterRoot = '/';
-        return FlutterpiCache.test(
+        return FlutterDrmBundlerCache.test(
           rootOverride: fs.directory('/cache')..createSync(),
           logger: globals.logger,
           fileSystem: fs,

@@ -1,17 +1,15 @@
-name: flutterpi_tool
-description: FlutterPi-plugin-bridge-tool - a tool to make development & distribution of flutter-pi apps easier.
+name: flutter_drm_bundler
+description: flutter-drm-bundler - a tool to make development & distribution of flutter-drm-embedder apps easier.
 version: 0.10.1
-repository: https://github.com/buzzcola3/FlutterPi-plugin-bridge-tool
+repository: https://github.com/buzzcola3/flutter-drm-bundler
 
 environment:
   sdk: ^3.0.5
   flutter: ">=3.38.0"
 
 executables:
-  # TODO(ardera): Maybe add an alias `flutterpi-tool` here?
-  flutterpi_tool: flutterpi_tool
-  flutterpi-plugin-bridge-tool: flutterpi_tool
-  FlutterPi-plugin-bridge-tool: flutterpi_tool
+  flutter_drm_bundler: flutter_drm_bundler
+  flutter-drm-bundler: flutter_drm_bundler
 
 # Add regular dependencies here.
 dependencies:

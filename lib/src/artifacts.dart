@@ -1,67 +1,67 @@
-import 'package:flutterpi_tool/src/build_system/extended_environment.dart';
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/build_system/extended_environment.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 
-sealed class FlutterpiArtifact {
-  const FlutterpiArtifact();
+sealed class FlutterDrmEmbedderArtifact {
+  const FlutterDrmEmbedderArtifact();
 }
 
-final class FlutterpiBinary extends FlutterpiArtifact {
-  const FlutterpiBinary({required this.target, required this.mode});
+final class FlutterDrmEmbedderBinary extends FlutterDrmEmbedderArtifact {
+  const FlutterDrmEmbedderBinary({required this.target, required this.mode});
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final BuildMode mode;
 }
 
-final class Engine extends FlutterpiArtifact {
+final class Engine extends FlutterDrmEmbedderArtifact {
   const Engine({required this.target, required this.flavor});
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final EngineFlavor flavor;
 }
 
-final class EngineDebugSymbols extends FlutterpiArtifact {
+final class EngineDebugSymbols extends FlutterDrmEmbedderArtifact {
   const EngineDebugSymbols({
     required this.target,
     required this.flavor,
   });
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final EngineFlavor flavor;
 }
 
-final class GenSnapshot extends FlutterpiArtifact {
+final class GenSnapshot extends FlutterDrmEmbedderArtifact {
   const GenSnapshot({
     required this.host,
     required this.target,
     required this.mode,
   }) : assert(mode == BuildMode.release || mode == BuildMode.profile);
 
-  final FlutterpiHostPlatform host;
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmHostPlatform host;
+  final FlutterDrmTargetPlatform target;
   final BuildMode mode;
 }
 
-final class FlutterpiGtkShim extends FlutterpiArtifact {
-  const FlutterpiGtkShim({required this.target, required this.mode});
+final class FlutterDrmEmbedderGtkShim extends FlutterDrmEmbedderArtifact {
+  const FlutterDrmEmbedderGtkShim({required this.target, required this.mode});
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final BuildMode mode;
 }
 
-abstract class FlutterpiArtifacts implements Artifacts {
-  File getFlutterpiArtifact(FlutterpiArtifact artifact);
+abstract class FlutterDrmEmbedderArtifacts implements Artifacts {
+  File getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact);
 }
 
-class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
-  CachedFlutterpiArtifacts({
+class CachedFlutterDrmEmbedderArtifacts implements FlutterDrmEmbedderArtifacts {
+  CachedFlutterDrmEmbedderArtifacts({
     required this.inner,
     required this.cache,
   });
 
   final Artifacts inner;
-  final FlutterpiCache cache;
+  final FlutterDrmBundlerCache cache;
 
   @override
   String getArtifactPath(
@@ -79,10 +79,10 @@ class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
   }
 
   @override
-  File getFlutterpiArtifact(FlutterpiArtifact artifact) {
+  File getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
     return switch (artifact) {
-      FlutterpiBinary(:final target, :final mode) => cache
-          .getArtifactDirectory('flutter-pi')
+      FlutterDrmEmbedderBinary(:final target, :final mode) => cache
+          .getArtifactDirectory('flutter-drm-embedder')
           .childDirectory(target.triple)
           .childDirectory(
             switch (mode) {
@@ -93,9 +93,9 @@ class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
                 'release',
             },
           )
-          .childFile('flutter-pi'),
-      FlutterpiGtkShim(:final target, :final mode) => cache
-          .getArtifactDirectory('flutter-pi')
+          .childFile('flutter-drm-embedder'),
+      FlutterDrmEmbedderGtkShim(:final target, :final mode) => cache
+          .getArtifactDirectory('flutter-drm-embedder')
           .childDirectory('gtk-shim')
           .childDirectory(target.triple)
           .childDirectory(
@@ -110,15 +110,15 @@ class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
           .childFile('libflutter_linux_gtk.so'),
       Engine(:final target, :final flavor) => cache
           .getArtifactDirectory('engine')
-          .childDirectory('flutterpi-engine-$target-$flavor')
+          .childDirectory('flutter-drm-engine-$target-$flavor')
           .childFile('libflutter_engine.so'),
       EngineDebugSymbols(:final target, :final flavor) => cache
           .getArtifactDirectory('engine')
-          .childDirectory('flutterpi-engine-dbgsyms-$target-$flavor')
+          .childDirectory('flutter-drm-engine-dbgsyms-$target-$flavor')
           .childFile('libflutter_engine.dbgsyms'),
       GenSnapshot(:final host, :final target, :final mode) => cache
           .getArtifactDirectory('engine')
-          .childDirectory('flutterpi-gen-snapshot-$host-$target-$mode')
+          .childDirectory('flutter-drm-gen-snapshot-$host-$target-$mode')
           .childFile('gen_snapshot')
     };
   }
@@ -140,12 +140,12 @@ class CachedFlutterpiArtifacts implements FlutterpiArtifacts {
   bool get usesLocalArtifacts => inner.usesLocalArtifacts;
 }
 
-class FlutterpiArtifactsWrapper implements FlutterpiArtifacts {
-  FlutterpiArtifactsWrapper({
+class FlutterDrmEmbedderArtifactsWrapper implements FlutterDrmEmbedderArtifacts {
+  FlutterDrmEmbedderArtifactsWrapper({
     required this.inner,
   });
 
-  final FlutterpiArtifacts inner;
+  final FlutterDrmEmbedderArtifacts inner;
 
   @override
   String getArtifactPath(
@@ -163,8 +163,8 @@ class FlutterpiArtifactsWrapper implements FlutterpiArtifacts {
   }
 
   @override
-  File getFlutterpiArtifact(FlutterpiArtifact artifact) {
-    return inner.getFlutterpiArtifact(artifact);
+  File getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
+    return inner.getFlutterDrmEmbedderArtifact(artifact);
   }
 
   @override
@@ -184,15 +184,15 @@ class FlutterpiArtifactsWrapper implements FlutterpiArtifacts {
   bool get usesLocalArtifacts => inner.usesLocalArtifacts;
 }
 
-class FlutterToFlutterpiArtifactsForwarder extends FlutterpiArtifactsWrapper {
-  FlutterToFlutterpiArtifactsForwarder({
+class FlutterToFlutterDrmEmbedderArtifactsForwarder extends FlutterDrmEmbedderArtifactsWrapper {
+  FlutterToFlutterDrmEmbedderArtifactsForwarder({
     required super.inner,
     required this.host,
     required this.target,
   });
 
-  final FlutterpiHostPlatform host;
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmHostPlatform host;
+  final FlutterDrmTargetPlatform target;
 
   @override
   String getArtifactPath(
@@ -203,7 +203,7 @@ class FlutterToFlutterpiArtifactsForwarder extends FlutterpiArtifactsWrapper {
   }) {
     return switch (artifact) {
       Artifact.genSnapshot => inner
-          .getFlutterpiArtifact(
+          .getFlutterDrmEmbedderArtifact(
             GenSnapshot(host: host, target: target.genericVariant, mode: mode!),
           )
           .path,
@@ -217,19 +217,19 @@ class FlutterToFlutterpiArtifactsForwarder extends FlutterpiArtifactsWrapper {
   }
 }
 
-class LocalFlutterpiBinaryOverride extends FlutterpiArtifactsWrapper {
-  LocalFlutterpiBinaryOverride({
+class LocalFlutterDrmEmbedderBinaryOverride extends FlutterDrmEmbedderArtifactsWrapper {
+  LocalFlutterDrmEmbedderBinaryOverride({
     required super.inner,
-    required this.flutterpiBinary,
+    required this.flutterDrmEmbedderBinary,
   });
 
-  final File flutterpiBinary;
+  final File flutterDrmEmbedderBinary;
 
   @override
-  File getFlutterpiArtifact(FlutterpiArtifact artifact) {
+  File getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
     return switch (artifact) {
-      FlutterpiBinary _ => flutterpiBinary,
-      _ => inner.getFlutterpiArtifact(artifact),
+      FlutterDrmEmbedderBinary _ => flutterDrmEmbedderBinary,
+      _ => inner.getFlutterDrmEmbedderArtifact(artifact),
     };
   }
 
@@ -237,39 +237,39 @@ class LocalFlutterpiBinaryOverride extends FlutterpiArtifactsWrapper {
   bool get usesLocalArtifacts => true;
 }
 
-extension _VisitFlutterpiArtifact on SourceVisitor {
-  void visitFlutterpiArtifact(FlutterpiArtifact artifact) {
+extension _VisitFlutterDrmEmbedderArtifact on SourceVisitor {
+  void visitFlutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
     final environment = this.environment;
     if (environment is! ExtendedEnvironment) {
       throw StateError(
-        'Expected environment to be a FlutterpiEnvironment, '
+        'Expected environment to be a FlutterDrmEnvironment, '
         'but got ${environment.runtimeType}.',
       );
     }
 
-    final artifactFile = environment.artifacts.getFlutterpiArtifact(artifact);
+    final artifactFile = environment.artifacts.getFlutterDrmEmbedderArtifact(artifact);
     assert(artifactFile.fileSystem == environment.fileSystem);
 
     sources.add(artifactFile);
   }
 }
 
-extension SourceFlutterpiArtifactSource on Source {
-  static Source flutterpiArtifact(FlutterpiArtifact artifact) {
-    return FlutterpiArtifactSource(artifact);
+extension SourceFlutterDrmEmbedderArtifactSource on Source {
+  static Source flutterDrmEmbedderArtifact(FlutterDrmEmbedderArtifact artifact) {
+    return FlutterDrmEmbedderArtifactSource(artifact);
   }
 }
 
-class FlutterpiArtifactSource implements Source {
-  final FlutterpiArtifact artifact;
+class FlutterDrmEmbedderArtifactSource implements Source {
+  final FlutterDrmEmbedderArtifact artifact;
 
-  const FlutterpiArtifactSource(
+  const FlutterDrmEmbedderArtifactSource(
     this.artifact,
   );
 
   @override
   void accept(SourceVisitor visitor) {
-    visitor.visitFlutterpiArtifact(artifact);
+    visitor.visitFlutterDrmEmbedderArtifact(artifact);
   }
 
   @override

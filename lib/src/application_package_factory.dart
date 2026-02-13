@@ -1,7 +1,7 @@
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 
-class FlutterpiApplicationPackageFactory
+class FlutterDrmBundlerApplicationPackageFactory
     implements FlutterApplicationPackageFactory {
   @override
   Future<ApplicationPackage?> getPackageForPlatform(
@@ -14,7 +14,7 @@ class FlutterpiApplicationPackageFactory
       case TargetPlatform.linux_x64:
         final flutterProject = FlutterProject.current();
 
-        return BuildableFlutterpiAppBundle(
+        return BuildableFlutterDrmBundlerAppBundle(
           id: flutterProject.manifest.appName,
           name: flutterProject.manifest.appName,
           displayName: flutterProject.manifest.appName,

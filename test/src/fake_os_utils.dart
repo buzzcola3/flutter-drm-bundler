@@ -1,8 +1,8 @@
 import 'package:file/file.dart';
-import 'package:flutterpi_tool/src/archive.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/archive.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:test/fake.dart';
 
 class FakeOperatingSystemUtils extends Fake implements fl.OperatingSystemUtils {
@@ -53,7 +53,7 @@ class FakeMoreOperatingSystemUtils extends Fake
     implements MoreOperatingSystemUtils {
   FakeMoreOperatingSystemUtils({
     this.hostPlatform = fl.HostPlatform.linux_x64,
-    this.fpiHostPlatform = FlutterpiHostPlatform.linuxX64,
+    this.fpiHostPlatform = FlutterDrmHostPlatform.linuxX64,
   });
 
   final List<List<String>> chmods = <List<String>>[];
@@ -102,5 +102,5 @@ class FakeMoreOperatingSystemUtils extends Fake
   Future<int> findFreePort({bool ipv6 = false}) async => 12345;
 
   @override
-  final FlutterpiHostPlatform fpiHostPlatform;
+  final FlutterDrmHostPlatform fpiHostPlatform;
 }

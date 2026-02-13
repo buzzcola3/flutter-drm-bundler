@@ -3,131 +3,131 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/build_system/extended_environment.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/fltool/globals.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/build_system/extended_environment.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/globals.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:path/path.dart' as p;
 
-class ReleaseBundleFlutterpiAssets extends CompositeTarget {
-  ReleaseBundleFlutterpiAssets({
+class ReleaseBundleFlutterDrmAssets extends CompositeTarget {
+  ReleaseBundleFlutterDrmAssets({
     required this.target,
     required this.layout,
     bool debugSymbols = false,
-    bool forceBundleFlutterpi = false,
+    bool forceBundleEmbedder = false,
   }) : super([
           CopyFlutterAssets(
             layout: layout,
             buildMode: BuildMode.release,
           ),
-          FlutterpiPluginBundle(layout: layout),
+          FlutterDrmBundlerPluginBundle(layout: layout),
           CopyIcudtl(layout: layout),
           const DartBuildForNative(),
           const KernelSnapshot(),
           const InstallCodeAssets(),
-          CopyFlutterpiEngine(
+          CopyFlutterDrmEngine(
             target: target,
             flavor: EngineFlavor.release,
             includeDebugSymbols: debugSymbols,
             layout: layout,
           ),
-          if (layout == FilesystemLayout.flutterPi || forceBundleFlutterpi)
-            CopyFlutterpiBinary(
+          if (layout == FilesystemLayout.flutterDrm || forceBundleEmbedder)
+            CopyFlutterDrmEmbedderBinary(
               target: target,
               buildMode: BuildMode.release,
               layout: layout,
             ),
-          FlutterpiAppElf(
+          FlutterDrmBundlerAppElf(
             AotElfRelease(TargetPlatform.linux_arm64),
             layout: layout,
           ),
         ]);
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final FilesystemLayout layout;
 
   @override
-  String get name => 'release_bundle_flutterpi_${target.shortName}_assets';
+  String get name => 'release_bundle_flutter_drm_${target.shortName}_assets';
 }
 
-class ProfileBundleFlutterpiAssets extends CompositeTarget {
-  ProfileBundleFlutterpiAssets({
+class ProfileBundleFlutterDrmAssets extends CompositeTarget {
+  ProfileBundleFlutterDrmAssets({
     required this.target,
     bool debugSymbols = false,
     required FilesystemLayout layout,
-    bool forceBundleFlutterpi = false,
+    bool forceBundleEmbedder = false,
   }) : super([
           CopyFlutterAssets(
             layout: layout,
             buildMode: BuildMode.profile,
           ),
-          FlutterpiPluginBundle(layout: layout),
+          FlutterDrmBundlerPluginBundle(layout: layout),
           CopyIcudtl(layout: layout),
           const DartBuildForNative(),
           const KernelSnapshot(),
           const InstallCodeAssets(),
-          CopyFlutterpiEngine(
+          CopyFlutterDrmEngine(
             target: target,
             flavor: EngineFlavor.profile,
             includeDebugSymbols: debugSymbols,
             layout: layout,
           ),
-          if (layout == FilesystemLayout.flutterPi || forceBundleFlutterpi)
-            CopyFlutterpiBinary(
+          if (layout == FilesystemLayout.flutterDrm || forceBundleEmbedder)
+            CopyFlutterDrmEmbedderBinary(
               target: target,
               buildMode: BuildMode.profile,
               layout: layout,
             ),
-          FlutterpiAppElf(
+          FlutterDrmBundlerAppElf(
             AotElfProfile(TargetPlatform.linux_arm64),
             layout: layout,
           ),
         ]);
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
 
   @override
-  String get name => 'profile_bundle_flutterpi_${target.shortName}_assets';
+  String get name => 'profile_bundle_flutter_drm_${target.shortName}_assets';
 }
 
-class DebugBundleFlutterpiAssets extends CompositeTarget {
-  DebugBundleFlutterpiAssets({
+class DebugBundleFlutterDrmAssets extends CompositeTarget {
+  DebugBundleFlutterDrmAssets({
     required this.target,
     bool unoptimized = false,
     bool debugSymbols = false,
     required FilesystemLayout layout,
-    bool forceBundleFlutterpi = false,
+    bool forceBundleEmbedder = false,
   }) : super([
           CopyFlutterAssets(
             layout: layout,
             buildMode: BuildMode.debug,
           ),
-          FlutterpiPluginBundle(layout: layout),
+          FlutterDrmBundlerPluginBundle(layout: layout),
           CopyIcudtl(layout: layout),
           const DartBuildForNative(),
           const KernelSnapshot(),
           const InstallCodeAssets(),
-          CopyFlutterpiEngine(
+          CopyFlutterDrmEngine(
             target: target,
             flavor: unoptimized ? EngineFlavor.debugUnopt : EngineFlavor.debug,
             includeDebugSymbols: debugSymbols,
             layout: layout,
           ),
-          if (layout == FilesystemLayout.flutterPi || forceBundleFlutterpi)
-            CopyFlutterpiBinary(
+          if (layout == FilesystemLayout.flutterDrm || forceBundleEmbedder)
+            CopyFlutterDrmEmbedderBinary(
               target: target,
               buildMode: BuildMode.debug,
               layout: layout,
             ),
         ]);
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
 
   @override
-  String get name => 'debug_bundle_flutterpi_assets';
+  String get name => 'debug_bundle_flutter_drm_assets';
 }
 
 class CopyIcudtl extends Target {
@@ -136,7 +136,7 @@ class CopyIcudtl extends Target {
   final FilesystemLayout layout;
 
   @override
-  String get name => 'flutterpi_copy_icudtl';
+  String get name => 'flutter_drm_copy_icudtl';
 
   @override
   List<Source> get inputs => const <Source>[
@@ -146,7 +146,7 @@ class CopyIcudtl extends Target {
   @override
   List<Source> get outputs => <Source>[
         switch (layout) {
-          FilesystemLayout.flutterPi =>
+          FilesystemLayout.flutterDrm =>
             Source.pattern('{OUTPUT_DIR}/icudtl.dat'),
           FilesystemLayout.metaFlutter =>
             Source.pattern('{OUTPUT_DIR}/data/icudtl.dat'),
@@ -162,7 +162,7 @@ class CopyIcudtl extends Target {
         .file(environment.artifacts.getArtifactPath(Artifact.icuData));
 
     final outputDir = switch (layout) {
-      FilesystemLayout.flutterPi => environment.outputDir,
+      FilesystemLayout.flutterDrm => environment.outputDir,
       FilesystemLayout.metaFlutter =>
         environment.outputDir.childDirectory('data'),
     };
@@ -220,34 +220,34 @@ void fixupExePermissions(
   }
 }
 
-class CopyFlutterpiBinary extends Target {
-  CopyFlutterpiBinary({
+class CopyFlutterDrmEmbedderBinary extends Target {
+  CopyFlutterDrmEmbedderBinary({
     required this.target,
     required this.buildMode,
     required this.layout,
   });
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final BuildMode buildMode;
   final FilesystemLayout layout;
 
   @override
   Future<void> build(Environment environment) async {
     final artifacts = environment.artifacts;
-    if (artifacts is! FlutterpiArtifacts) {
+    if (artifacts is! FlutterDrmEmbedderArtifacts) {
       throw StateError(
-        'Expected artifacts to be a FlutterpiArtifacts, '
+        'Expected artifacts to be a FlutterDrmEmbedderArtifacts, '
         'but got ${artifacts.runtimeType}.',
       );
     }
 
     final file = artifacts
-        .getFlutterpiArtifact(FlutterpiBinary(target: target, mode: buildMode));
+        .getFlutterDrmEmbedderArtifact(FlutterDrmEmbedderBinary(target: target, mode: buildMode));
 
     assert(file.fileSystem == environment.fileSystem);
 
     final outputDir = switch (layout) {
-      FilesystemLayout.flutterPi => environment.outputDir,
+      FilesystemLayout.flutterDrm => environment.outputDir,
       FilesystemLayout.metaFlutter =>
         environment.outputDir.childDirectory('bin'),
     };
@@ -255,7 +255,7 @@ class CopyFlutterpiBinary extends Target {
       outputDir.createSync(recursive: true);
     }
 
-    final outputFile = outputDir.childFile('flutter-pi');
+    final outputFile = outputDir.childFile('flutter-drm-embedder');
     file.copySync(outputFile.path);
 
     if (environment.platform.isLinux || environment.platform.isMacOS) {
@@ -265,12 +265,12 @@ class CopyFlutterpiBinary extends Target {
       if (outputExeBits != (true, true, true)) {
         if (inputExeBits == outputExeBits) {
           environment.logger.printTrace(
-            'flutter-pi binary in cache was not universally executable. '
+            'flutter-drm-embedder binary in cache was not universally executable. '
             'Changing permissions...',
           );
         } else {
           environment.logger.printTrace(
-            'Copying flutter-pi binary from cache to output directory did not preserve executable bit. '
+            'Copying flutter-drm-embedder binary from cache to output directory did not preserve executable bit. '
             'Changing permissions...',
           );
         }
@@ -285,27 +285,27 @@ class CopyFlutterpiBinary extends Target {
 
   @override
   List<Source> get inputs => <Source>[
-        FlutterpiArtifactSource(
-          FlutterpiBinary(target: target, mode: buildMode),
+        FlutterDrmEmbedderArtifactSource(
+          FlutterDrmEmbedderBinary(target: target, mode: buildMode),
         ),
       ];
 
   @override
-  String get name => 'copy_flutterpi';
+  String get name => 'copy_flutter_drm_embedder';
 
   @override
   List<Source> get outputs => <Source>[
         switch (layout) {
-          FilesystemLayout.flutterPi =>
-            Source.pattern('{OUTPUT_DIR}/flutter-pi'),
+          FilesystemLayout.flutterDrm =>
+            Source.pattern('{OUTPUT_DIR}/flutter-drm-embedder'),
           FilesystemLayout.metaFlutter =>
-            Source.pattern('{OUTPUT_DIR}/bin/flutter-pi'),
+            Source.pattern('{OUTPUT_DIR}/bin/flutter-drm-embedder'),
         },
       ];
 }
 
-class CopyFlutterpiEngine extends Target {
-  CopyFlutterpiEngine({
+class CopyFlutterDrmEngine extends Target {
+  CopyFlutterDrmEngine({
     required this.target,
     required this.flavor,
     required this.layout,
@@ -319,37 +319,37 @@ class CopyFlutterpiEngine extends Target {
           flavor: flavor,
         );
 
-  final FlutterpiTargetPlatform target;
+  final FlutterDrmTargetPlatform target;
   final EngineFlavor flavor;
   final bool includeDebugSymbols;
   final FilesystemLayout layout;
 
-  final FlutterpiArtifact _engine;
-  final FlutterpiArtifact _debugSymbols;
+  final FlutterDrmEmbedderArtifact _engine;
+  final FlutterDrmEmbedderArtifact _debugSymbols;
 
   @override
   List<Target> get dependencies => [];
 
   @override
   List<Source> get inputs => [
-        FlutterpiArtifactSource(_engine),
-        if (includeDebugSymbols) FlutterpiArtifactSource(_debugSymbols),
+        FlutterDrmEmbedderArtifactSource(_engine),
+        if (includeDebugSymbols) FlutterDrmEmbedderArtifactSource(_debugSymbols),
       ];
 
   @override
-  String get name => 'copy_flutterpi_engine_${target.shortName}_$flavor';
+  String get name => 'copy_flutter_drm_engine_${target.shortName}_$flavor';
 
   @override
   List<Source> get outputs => [
         switch (layout) {
-          FilesystemLayout.flutterPi =>
+          FilesystemLayout.flutterDrm =>
             Source.pattern('{OUTPUT_DIR}/libflutter_engine.so'),
           FilesystemLayout.metaFlutter =>
             Source.pattern('{OUTPUT_DIR}/lib/libflutter_engine.so'),
         },
         if (includeDebugSymbols)
           switch (layout) {
-            FilesystemLayout.flutterPi =>
+            FilesystemLayout.flutterDrm =>
               Source.pattern('{OUTPUT_DIR}/libflutter_engine.dbgsyms'),
             FilesystemLayout.metaFlutter =>
               Source.pattern('{OUTPUT_DIR}/lib/libflutter_engine.dbgsyms'),
@@ -359,7 +359,7 @@ class CopyFlutterpiEngine extends Target {
   @override
   Future<void> build(covariant ExtendedEnvironment environment) async {
     final outputDir = switch (layout) {
-      FilesystemLayout.flutterPi => environment.outputDir,
+      FilesystemLayout.flutterDrm => environment.outputDir,
       FilesystemLayout.metaFlutter =>
         environment.outputDir.childDirectory('lib'),
     };
@@ -370,7 +370,7 @@ class CopyFlutterpiEngine extends Target {
 
     final outputFile = outputDir.childFile('libflutter_engine.so');
 
-    final engine = environment.artifacts.getFlutterpiArtifact(_engine);
+    final engine = environment.artifacts.getFlutterDrmEmbedderArtifact(_engine);
 
     engine.copySync(outputFile.path);
 
@@ -386,7 +386,7 @@ class CopyFlutterpiEngine extends Target {
       final dbgsymsOutputFile =
           outputDir.childFile('libflutter_engine.dbgsyms');
 
-      final dbgsyms = environment.artifacts.getFlutterpiArtifact(_debugSymbols);
+      final dbgsyms = environment.artifacts.getFlutterDrmEmbedderArtifact(_debugSymbols);
 
       dbgsyms.copySync(dbgsymsOutputFile.path);
 
@@ -402,16 +402,16 @@ class CopyFlutterpiEngine extends Target {
 }
 
 /// A wrapper for AOT compilation that copies app.so into the output directory.
-class FlutterpiAppElf extends Target {
-  /// Create a [FlutterpiAppElf] wrapper for [aotTarget].
-  const FlutterpiAppElf(this.aotTarget, {required this.layout});
+class FlutterDrmBundlerAppElf extends Target {
+  /// Create a [FlutterDrmBundlerAppElf] wrapper for [aotTarget].
+  const FlutterDrmBundlerAppElf(this.aotTarget, {required this.layout});
 
   /// The [AotElfBase] subclass that produces the app.so.
   final AotElfBase aotTarget;
   final FilesystemLayout layout;
 
   @override
-  String get name => 'flutterpi_aot_bundle';
+  String get name => 'flutter_drm_aot_bundle';
 
   @override
   List<Source> get inputs => const <Source>[
@@ -421,7 +421,7 @@ class FlutterpiAppElf extends Target {
   @override
   List<Source> get outputs => <Source>[
         switch (layout) {
-          FilesystemLayout.flutterPi => Source.pattern('{OUTPUT_DIR}/app.so'),
+          FilesystemLayout.flutterDrm => Source.pattern('{OUTPUT_DIR}/app.so'),
           FilesystemLayout.metaFlutter =>
             Source.pattern('{OUTPUT_DIR}/lib/libapp.so'),
         },
@@ -436,7 +436,7 @@ class FlutterpiAppElf extends Target {
   Future<void> build(covariant ExtendedEnvironment environment) async {
     final appElf = environment.buildDir.childFile('app.so');
     final outputDir = switch (layout) {
-      FilesystemLayout.flutterPi => environment.outputDir,
+      FilesystemLayout.flutterDrm => environment.outputDir,
       FilesystemLayout.metaFlutter =>
         environment.outputDir.childDirectory('lib'),
     };
@@ -445,7 +445,7 @@ class FlutterpiAppElf extends Target {
     }
 
     final outputFile = switch (layout) {
-      FilesystemLayout.flutterPi => outputDir.childFile('app.so'),
+      FilesystemLayout.flutterDrm => outputDir.childFile('app.so'),
       FilesystemLayout.metaFlutter => outputDir.childFile('libapp.so'),
     };
 
@@ -466,7 +466,7 @@ class CopyFlutterAssetsOld extends CopyFlutterBundle {
   const CopyFlutterAssetsOld();
 
   @override
-  String get name => 'bundle_flutterpi_assets';
+  String get name => 'bundle_flutter_drm_assets';
 }
 
 class CopyFlutterAssets extends Target {
@@ -479,7 +479,7 @@ class CopyFlutterAssets extends Target {
   final BuildMode buildMode;
 
   @override
-  String get name => 'copy_flutterpi_assets_${layout}_$buildMode';
+  String get name => 'copy_flutter_drm_assets_${layout}_$buildMode';
 
   @override
   List<Target> get dependencies => <Target>[
@@ -496,7 +496,7 @@ class CopyFlutterAssets extends Target {
   List<Source> get outputs => <Source>[
         if (buildMode.isJit)
           switch (layout) {
-            FilesystemLayout.flutterPi =>
+            FilesystemLayout.flutterDrm =>
               Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
             FilesystemLayout.metaFlutter => Source.pattern(
                 '{OUTPUT_DIR}/data/flutter_assets/kernel_blob.bin',
@@ -519,7 +519,7 @@ class CopyFlutterAssets extends Target {
     };
 
     final outputDir = switch (layout) {
-      FilesystemLayout.flutterPi => environment.outputDir,
+      FilesystemLayout.flutterDrm => environment.outputDir,
       FilesystemLayout.metaFlutter => environment.outputDir
           .childDirectory('data')
           .childDirectory('flutter_assets'),
@@ -565,8 +565,8 @@ class CopyFlutterAssets extends Target {
   }
 }
 
-class _FlutterpiPluginInfo {
-  _FlutterpiPluginInfo({required this.name, required this.path});
+class _FlutterDrmBundlerPluginInfo {
+  _FlutterDrmBundlerPluginInfo({required this.name, required this.path});
 
   final String name;
   final String path;
@@ -584,7 +584,7 @@ const String _runBundleScriptContent = r'''#!/usr/bin/env bash
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
-  echo "Usage: $0 /path/to/bundle [flutter-pi args...]" >&2
+  echo "Usage: $0 /path/to/bundle [flutter-drm-embedder args...]" >&2
   exit 1
 fi
 
@@ -592,22 +592,22 @@ bundle="$1"
 shift
 
 bundle_dir="$(cd "$bundle" && pwd)"
-flutterpi="$bundle_dir/flutter-pi"
+flutter_drm_embedder="$bundle_dir/flutter-drm-embedder"
 
-if [[ ! -x "$flutterpi" ]]; then
-  echo "Error: bundled flutter-pi not found or not executable at $flutterpi" >&2
+if [[ ! -x "$flutter_drm_embedder" ]]; then
+  echo "Error: bundled flutter-drm-embedder not found or not executable at $flutter_drm_embedder" >&2
   exit 1
 fi
 
 plugins_dir="$bundle_dir/plugins"
 export LD_LIBRARY_PATH="$bundle_dir:$plugins_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-exec "$flutterpi" "$@" "$bundle_dir"
+exec "$flutter_drm_embedder" "$@" "$bundle_dir"
 ''';
 
 String _pluginSymbolName(String name) =>
     '${_normalizePluginName(name)}_plugin_register_with_registrar';
 
-List<_FlutterpiPluginInfo> _readLinuxPlugins(ExtendedEnvironment environment) {
+List<_FlutterDrmBundlerPluginInfo> _readLinuxPlugins(ExtendedEnvironment environment) {
   final pluginsFile = environment.projectDir
       .childFile('.flutter-plugins-dependencies');
   if (!pluginsFile.existsSync()) {
@@ -636,11 +636,11 @@ List<_FlutterpiPluginInfo> _readLinuxPlugins(ExtendedEnvironment environment) {
         final name = entry['name'];
         final path = entry['path'];
         if (name is String && path is String) {
-          return _FlutterpiPluginInfo(name: name, path: path);
+          return _FlutterDrmBundlerPluginInfo(name: name, path: path);
         }
         return null;
       })
-      .whereType<_FlutterpiPluginInfo>()
+      .whereType<_FlutterDrmBundlerPluginInfo>()
       .toList(growable: false);
 }
 
@@ -735,12 +735,12 @@ List<String> _targetPathTokens(String? targetShortName) {
 
 File? _findPluginLibrary(
   ExtendedEnvironment environment,
-  _FlutterpiPluginInfo plugin,
+  _FlutterDrmBundlerPluginInfo plugin,
 ) {
   final fs = environment.fileSystem;
   final libName = _pluginLibraryName(plugin.name);
   final targetTokens =
-      _targetPathTokens(environment.defines['flutterpi-target']);
+      _targetPathTokens(environment.defines['flutter-drm-target']);
 
   final pluginDir = p.isAbsolute(plugin.path)
       ? fs.directory(plugin.path)
@@ -749,7 +749,7 @@ File? _findPluginLibrary(
   final buildDir = environment.projectDir.childDirectory('build');
 
   final candidates = <Directory>[
-    buildDir.childDirectory('flutter-pi').childDirectory('plugins'),
+    buildDir.childDirectory('flutter-drm').childDirectory('plugins'),
     buildDir.childDirectory('linux'),
     pluginDir.childDirectory('build'),
   ];
@@ -779,16 +779,16 @@ File? _findPluginLibrary(
 
 File? _findFlutterLinuxGtkLibrary(ExtendedEnvironment environment) {
   final artifacts = environment.artifacts;
-  if (artifacts is! FlutterpiArtifacts) {
+  if (artifacts is! FlutterDrmEmbedderArtifacts) {
     return null;
   }
 
-  final targetShortName = environment.defines['flutterpi-target'];
+  final targetShortName = environment.defines['flutter-drm-target'];
   if (targetShortName == null) {
     return null;
   }
 
-  final target = FlutterpiTargetPlatform.values
+  final target = FlutterDrmTargetPlatform.values
       .firstWhere((platform) => platform.shortName == targetShortName);
 
   final buildModeName = environment.defines[kBuildMode];
@@ -798,18 +798,18 @@ File? _findFlutterLinuxGtkLibrary(ExtendedEnvironment environment) {
 
   final buildMode = BuildMode.fromCliName(buildModeName);
 
-  return artifacts.getFlutterpiArtifact(
-    FlutterpiGtkShim(target: target, mode: buildMode),
+  return artifacts.getFlutterDrmEmbedderArtifact(
+    FlutterDrmEmbedderGtkShim(target: target, mode: buildMode),
   );
 }
 
-class FlutterpiPluginBundle extends Target {
-  const FlutterpiPluginBundle({required this.layout});
+class FlutterDrmBundlerPluginBundle extends Target {
+  const FlutterDrmBundlerPluginBundle({required this.layout});
 
   final FilesystemLayout layout;
 
   @override
-  String get name => 'flutterpi_plugin_bundle';
+  String get name => 'flutter_drm_plugin_bundle';
 
   @override
   List<Target> get dependencies => const [];
@@ -868,7 +868,7 @@ class FlutterpiPluginBundle extends Target {
     final flutterGtkLib = _findFlutterLinuxGtkLibrary(environment);
     if (flutterGtkLib == null) {
       environment.logger.printTrace(
-        'Could not find $_flutterLinuxGtkShimInputName in flutter-pi cache. '
+        'Could not find $_flutterLinuxGtkShimInputName in flutter-drm-embedder cache. '
         'Skipping bundling GTK shim library.',
       );
     } else {

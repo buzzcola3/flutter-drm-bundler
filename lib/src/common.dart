@@ -1,10 +1,10 @@
 // ignore_for_file: implementation_imports
 
-import 'package:flutterpi_tool/src/fltool/common.dart' show BuildMode;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' show BuildMode;
 
 enum Bitness { b32, b64 }
 
-enum FlutterpiHostPlatform {
+enum FlutterDrmHostPlatform {
   darwinX64.b64('darwin-x64', 'macOS-X64', darwin: true),
   darwinARM64.b64('darwin-arm64', 'macOS-ARM64', darwin: true),
   linuxX64.b64('linux-x64', 'Linux-X64', linux: true),
@@ -14,7 +14,7 @@ enum FlutterpiHostPlatform {
   windowsX64.b64('windows-x64', 'Windows-X64', windows: true),
   windowsARM64.b64('windows-arm64', 'Windows-ARM64', windows: true);
 
-  const FlutterpiHostPlatform.b32(
+  const FlutterDrmHostPlatform.b32(
     this.name,
     this.githubName, {
     bool darwin = false,
@@ -30,7 +30,7 @@ enum FlutterpiHostPlatform {
           'Exactly one of darwin, linux, or windows must be specified.',
         );
 
-  const FlutterpiHostPlatform.b64(
+  const FlutterDrmHostPlatform.b64(
     this.name,
     this.githubName, {
     bool darwin = false,
@@ -58,7 +58,7 @@ enum FlutterpiHostPlatform {
   String toString() => name;
 }
 
-enum FlutterpiTargetPlatform {
+enum FlutterDrmTargetPlatform {
   genericArmV7.generic32('armv7-generic', 'arm-linux-gnueabihf'),
   genericAArch64.generic64('aarch64-generic', 'aarch64-linux-gnu'),
   genericX64.generic64('x64-generic', 'x86_64-linux-gnu'),
@@ -68,24 +68,24 @@ enum FlutterpiTargetPlatform {
   pi4.tuned32('pi4', 'armv7-generic', 'arm-linux-gnueabihf'),
   pi4_64.tuned64('pi4-64', 'aarch64-generic', 'aarch64-linux-gnu');
 
-  const FlutterpiTargetPlatform.generic64(this.shortName, this.triple)
+  const FlutterDrmTargetPlatform.generic64(this.shortName, this.triple)
       : isGeneric = true,
         _genericVariantStr = null,
         bitness = Bitness.b64;
 
-  const FlutterpiTargetPlatform.generic32(this.shortName, this.triple)
+  const FlutterDrmTargetPlatform.generic32(this.shortName, this.triple)
       : isGeneric = true,
         _genericVariantStr = null,
         bitness = Bitness.b32;
 
-  const FlutterpiTargetPlatform.tuned32(
+  const FlutterDrmTargetPlatform.tuned32(
     this.shortName,
     this._genericVariantStr,
     this.triple,
   )   : isGeneric = false,
         bitness = Bitness.b32;
 
-  const FlutterpiTargetPlatform.tuned64(
+  const FlutterDrmTargetPlatform.tuned64(
     this.shortName,
     this._genericVariantStr,
     this.triple,
@@ -98,7 +98,7 @@ enum FlutterpiTargetPlatform {
   final String? _genericVariantStr;
   final String triple;
 
-  FlutterpiTargetPlatform get genericVariant {
+  FlutterDrmTargetPlatform get genericVariant {
     if (_genericVariantStr != null) {
       return values
           .singleWhere((target) => target.shortName == _genericVariantStr);

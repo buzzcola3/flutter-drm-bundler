@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/dds.dart';
 import 'package:flutter_tools/src/device_vm_service_discovery_for_attach.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
 import 'package:test/test.dart';
 
 class FakeDevice implements fl.Device {

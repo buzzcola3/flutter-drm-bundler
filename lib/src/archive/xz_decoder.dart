@@ -5,7 +5,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:crypto/crypto.dart';
-import 'package:flutterpi_tool/src/archive/lzma/lzma_decoder.dart';
+import 'package:flutter_drm_bundler/src/archive/lzma/lzma_decoder.dart';
 
 // The XZ specification can be found at
 // https://tukaani.org/xz/xz-file-format.txt.

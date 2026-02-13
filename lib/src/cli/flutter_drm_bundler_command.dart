@@ -2,39 +2,39 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/file.dart';
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
-import 'package:flutterpi_tool/src/github.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/github.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:github/github.dart' as gh;
 import 'package:http/http.dart' as http;
 import 'package:process/process.dart';
 
 enum FilesystemLayout {
-  flutterPi,
+  flutterDrm,
   metaFlutter;
 
   @override
   String toString() {
     return switch (this) {
-      flutterPi => 'flutter-pi',
+      flutterDrm => 'flutter-drm',
       metaFlutter => 'meta-flutter'
     };
   }
 
   static FilesystemLayout fromString(String string) {
     return switch (string) {
-      'flutter-pi' => FilesystemLayout.flutterPi,
+      'flutter-drm' => FilesystemLayout.flutterDrm,
       'meta-flutter' => FilesystemLayout.metaFlutter,
       _ => throw ArgumentError.value(string, 'Unknown filesystem layout'),
     };
   }
 }
 
-mixin FlutterpiCommandMixin on fl.FlutterCommand {
+mixin FlutterDrmBundlerCommandMixin on fl.FlutterCommand {
   MyGithub createGithub({http.Client? httpClient}) {
     httpClient ??= http.Client();
 
@@ -54,7 +54,7 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     );
   }
 
-  FlutterpiCache createCustomCache({
+  FlutterDrmBundlerCache createCustomCache({
     required FileSystem fs,
     required fl.ShutdownHooks shutdownHooks,
     required fl.Logger logger,
@@ -69,7 +69,7 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     final githubEngineHash = stringArg('github-artifacts-engine-version');
 
     if (runId != null) {
-      return FlutterpiCache.fromWorkflow(
+      return FlutterDrmBundlerCache.fromWorkflow(
         hooks: shutdownHooks,
         logger: logger,
         fileSystem: fs,
@@ -83,7 +83,7 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
         github: createGithub(httpClient: httpClient),
       );
     } else {
-      return FlutterpiCache(
+      return FlutterDrmBundlerCache(
         hooks: shutdownHooks,
         logger: logger,
         fileSystem: fs,
@@ -125,11 +125,11 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     );
   }
 
-  void usesLocalFlutterpiExecutableArg({bool verboseHelp = false}) {
+  void usesLocalEmbedderExecutableArg({bool verboseHelp = false}) {
     argParser.addOption(
-      'flutterpi-binary',
+      'embedder-binary',
       help:
-          'Use a custom, pre-built flutter-pi executable instead of download one from the Flutter-Pi CI.',
+          'Use a custom, pre-built flutter-drm-embedder executable instead of download one from the Flutter DRM Embedder CI.',
       valueHelp: 'path',
       hide: !verboseHelp,
     );
@@ -313,15 +313,15 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     }
   }
 
-  File? getLocalFlutterpiExecutable() {
-    final path = stringArg('flutterpi-binary');
+  File? getLocalEmbedderExecutable() {
+    final path = stringArg('embedder-binary');
     if (path == null) {
       return null;
     }
 
     if (!globals.fs.isFileSync(path)) {
       usageException(
-        'The specified flutter-pi binary does not exist, '
+        'The specified flutter-drm-embedder binary does not exist, '
         'or is not a file: $path',
       );
     }
@@ -335,25 +335,25 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
       valueHelp: 'layout',
       help:
           'The filesystem layout of the built app bundle. Yocto (meta-flutter) '
-          'uses a different filesystem layout for apps than flutter-pi normally '
-          'accepts, so when trying to use flutterpi_tool with a device running '
+          'uses a different filesystem layout for apps than flutter-drm-embedder normally '
+          'accepts, so when trying to use flutter_drm_bundler with a device running '
           'a meta-flutter yocto image, the meta-flutter fs layout must be '
           'chosen instead.',
-      allowed: ['flutter-pi', 'meta-flutter'],
-      defaultsTo: 'flutter-pi',
+      allowed: ['flutter-drm', 'meta-flutter'],
+      defaultsTo: 'flutter-drm',
       hide: !verboseHelp,
     );
   }
 
   FilesystemLayout get filesystemLayout => switch (stringArg('fs-layout')) {
-        'flutter-pi' => FilesystemLayout.flutterPi,
+        'flutter-drm' => FilesystemLayout.flutterDrm,
         'meta-flutter' => FilesystemLayout.metaFlutter,
         _ => usageException(
-            'Invalid --fs-layout: Expected "flutter-pi" or "meta-flutter".',
+            'Invalid --fs-layout: Expected "flutter-drm" or "meta-flutter".',
           ),
       };
 
-  Future<Set<FlutterpiTargetPlatform>> getDeviceBasedTargetPlatforms() async {
+  Future<Set<FlutterDrmTargetPlatform>> getDeviceBasedTargetPlatforms() async {
     final devices = await globals.deviceManager!.getDevices(
       filter: fl.DeviceDiscoveryFilter(excludeDisconnected: false),
     );
@@ -362,25 +362,25 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     }
 
     final targetPlatforms = {
-      for (final device in devices.whereType<FlutterpiSshDevice>())
-        await device.flutterpiTargetPlatform,
+      for (final device in devices.whereType<FlutterDrmBundlerSshDevice>())
+        await device.flutterDrmTargetPlatform,
     };
 
     return targetPlatforms.expand((p) => [p, p.genericVariant]).toSet();
   }
 
   Future<void> populateCache({
-    FlutterpiHostPlatform? hostPlatform,
-    Set<FlutterpiTargetPlatform>? targetPlatforms,
+    FlutterDrmHostPlatform? hostPlatform,
+    Set<FlutterDrmTargetPlatform>? targetPlatforms,
     Set<EngineFlavor>? flavors,
     Set<fl.BuildMode>? runtimeModes,
     bool? includeDebugSymbols,
   }) async {
     hostPlatform ??=
         switch ((globals.os as MoreOperatingSystemUtils).fpiHostPlatform) {
-      FlutterpiHostPlatform.darwinARM64 => FlutterpiHostPlatform.darwinX64,
-      FlutterpiHostPlatform.windowsARM64 => FlutterpiHostPlatform.windowsX64,
-      FlutterpiHostPlatform other => other,
+      FlutterDrmHostPlatform.darwinARM64 => FlutterDrmHostPlatform.darwinX64,
+      FlutterDrmHostPlatform.windowsARM64 => FlutterDrmHostPlatform.windowsX64,
+      FlutterDrmHostPlatform other => other,
     };
 
     targetPlatforms ??= await getDeviceBasedTargetPlatforms();
@@ -391,10 +391,10 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
 
     includeDebugSymbols ??= getIncludeDebugSymbols();
 
-    await globals.flutterpiCache.updateAll(
+    await globals.flutterDrmBundlerCache.updateAll(
       {fl.DevelopmentArtifact.universal},
       host: hostPlatform,
-      flutterpiPlatforms: targetPlatforms,
+      flutterDrmPlatforms: targetPlatforms,
       runtimeModes: runtimeModes,
       engineFlavors: flavors,
       includeDebugSymbols: includeDebugSymbols,
@@ -409,7 +409,7 @@ mixin FlutterpiCommandMixin on fl.FlutterCommand {
     bool excludeRelease = false,
   }) {
     throw UnsupportedError(
-      'This method is not supported in Flutterpi commands.',
+      'This method is not supported in FlutterDrmBundler commands.',
     );
   }
 

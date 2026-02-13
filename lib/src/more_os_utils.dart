@@ -1,9 +1,9 @@
-import 'package:flutterpi_tool/src/archive.dart';
+import 'package:flutter_drm_bundler/src/archive.dart';
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
 
 enum ArchiveType {
   tarXz,
@@ -52,7 +52,7 @@ abstract class MoreOperatingSystemUtils implements OperatingSystemUtils {
   factory MoreOperatingSystemUtils.wrap(OperatingSystemUtils os) =>
       MoreOperatingSystemUtilsWrapper(os: os);
 
-  FlutterpiHostPlatform get fpiHostPlatform;
+  FlutterDrmHostPlatform get fpiHostPlatform;
 
   @override
   void unpack(
@@ -79,14 +79,14 @@ class MoreOperatingSystemUtilsWrapper implements MoreOperatingSystemUtils {
   HostPlatform get hostPlatform => os.hostPlatform;
 
   @override
-  FlutterpiHostPlatform get fpiHostPlatform {
+  FlutterDrmHostPlatform get fpiHostPlatform {
     return switch (hostPlatform) {
-      HostPlatform.darwin_x64 => FlutterpiHostPlatform.darwinX64,
-      HostPlatform.darwin_arm64 => FlutterpiHostPlatform.darwinARM64,
-      HostPlatform.linux_x64 => FlutterpiHostPlatform.linuxX64,
-      HostPlatform.linux_arm64 => FlutterpiHostPlatform.linuxARM64,
-      HostPlatform.windows_x64 => FlutterpiHostPlatform.windowsX64,
-      HostPlatform.windows_arm64 => FlutterpiHostPlatform.windowsARM64,
+      HostPlatform.darwin_x64 => FlutterDrmHostPlatform.darwinX64,
+      HostPlatform.darwin_arm64 => FlutterDrmHostPlatform.darwinARM64,
+      HostPlatform.linux_x64 => FlutterDrmHostPlatform.linuxX64,
+      HostPlatform.linux_arm64 => FlutterDrmHostPlatform.linuxARM64,
+      HostPlatform.windows_x64 => FlutterDrmHostPlatform.windowsX64,
+      HostPlatform.windows_arm64 => FlutterDrmHostPlatform.windowsARM64,
     };
   }
 
@@ -231,7 +231,7 @@ class DelegatingMoreOsUtils implements MoreOperatingSystemUtils {
   HostPlatform get hostPlatform => delegate.hostPlatform;
 
   @override
-  FlutterpiHostPlatform get fpiHostPlatform => delegate.fpiHostPlatform;
+  FlutterDrmHostPlatform get fpiHostPlatform => delegate.fpiHostPlatform;
 
   @override
   void makeExecutable(File file) => delegate.makeExecutable(file);
@@ -348,7 +348,7 @@ class LinuxMoreOsUtils extends PosixMoreOsUtils {
   @protected
   final Logger logger;
 
-  FlutterpiHostPlatform _findHostPlatform() {
+  FlutterDrmHostPlatform _findHostPlatform() {
     final result = processUtils.runSync(<String>['uname', '-m']);
     // On x64 stdout is "uname -m: x86_64"
     // On arm64 stdout is "uname -m: aarch64, arm64_v8a"
@@ -358,32 +358,32 @@ class LinuxMoreOsUtils extends PosixMoreOsUtils {
         '  exit code: ${result.exitCode}\n'
         '  stdout: ${result.stdout.trimRight()}\n'
         '  stderr: ${result.stderr.trimRight()}\n'
-        'Assuming host platform is ${FlutterpiHostPlatform.linuxX64}.',
+        'Assuming host platform is ${FlutterDrmHostPlatform.linuxX64}.',
       );
-      return FlutterpiHostPlatform.linuxX64;
+      return FlutterDrmHostPlatform.linuxX64;
     }
 
     final machine = result.stdout.trim();
 
     if (machine.endsWith('x86_64')) {
-      return FlutterpiHostPlatform.linuxX64;
+      return FlutterDrmHostPlatform.linuxX64;
     } else if (machine == 'aarch64' || machine == 'arm64') {
-      return FlutterpiHostPlatform.linuxARM64;
+      return FlutterDrmHostPlatform.linuxARM64;
     } else if (machine == 'armv7l' || machine == 'arm') {
-      return FlutterpiHostPlatform.linuxARM;
+      return FlutterDrmHostPlatform.linuxARM;
     } else if (machine == 'riscv64') {
-      return FlutterpiHostPlatform.linuxRV64;
+      return FlutterDrmHostPlatform.linuxRV64;
     } else {
       logger.printError(
         'Unrecognized host platform: uname -m: $machine\n'
-        'Assuming host platform is ${FlutterpiHostPlatform.linuxX64}.',
+        'Assuming host platform is ${FlutterDrmHostPlatform.linuxX64}.',
       );
-      return FlutterpiHostPlatform.linuxX64;
+      return FlutterDrmHostPlatform.linuxX64;
     }
   }
 
   @override
-  late final FlutterpiHostPlatform fpiHostPlatform = _findHostPlatform();
+  late final FlutterDrmHostPlatform fpiHostPlatform = _findHostPlatform();
 }
 
 class MacosMoreOsUtils extends PosixMoreOsUtils {

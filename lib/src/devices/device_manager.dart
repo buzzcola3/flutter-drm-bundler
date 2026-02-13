@@ -1,22 +1,22 @@
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device_discovery.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/config.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device_discovery.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/config.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
 
-class FlutterpiToolDeviceManager extends DeviceManager {
-  FlutterpiToolDeviceManager({
+class FlutterDrmBundlerDeviceManager extends DeviceManager {
+  FlutterDrmBundlerDeviceManager({
     required super.logger,
     required Platform platform,
     required MoreOperatingSystemUtils operatingSystemUtils,
     required SshUtils sshUtils,
-    required FlutterPiToolConfig flutterpiToolConfig,
+    required FlutterDrmBundlerConfig flutterDrmBundlerConfig,
     this.specifiedDeviceId,
   }) : deviceDiscoverers = <DeviceDiscovery>[
-          FlutterpiSshDeviceDiscovery(
+          FlutterDrmBundlerSshDeviceDiscovery(
             sshUtils: sshUtils,
             logger: logger,
-            config: flutterpiToolConfig,
+            config: flutterDrmBundlerConfig,
             os: operatingSystemUtils,
           ),
         ];

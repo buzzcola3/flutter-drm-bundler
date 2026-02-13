@@ -1,13 +1,13 @@
 import 'package:file/file.dart';
-import 'package:flutterpi_tool/src/artifacts.dart';
-import 'package:flutterpi_tool/src/build_system/extended_environment.dart';
-import 'package:flutterpi_tool/src/build_system/targets.dart';
-import 'package:flutterpi_tool/src/cli/flutterpi_command.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
-import 'package:flutterpi_tool/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/artifacts.dart';
+import 'package:flutter_drm_bundler/src/build_system/extended_environment.dart';
+import 'package:flutter_drm_bundler/src/build_system/targets.dart';
+import 'package:flutter_drm_bundler/src/cli/flutter_drm_bundler_command.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
 import 'package:unified_analytics/unified_analytics.dart';
 
 class AppBuilder {
@@ -21,12 +21,12 @@ class AppBuilder {
   final fl.BuildSystem _buildSystem;
 
   Future<void> build({
-    required FlutterpiHostPlatform host,
-    required FlutterpiTargetPlatform target,
+    required FlutterDrmHostPlatform host,
+    required FlutterDrmTargetPlatform target,
     required fl.BuildInfo buildInfo,
     required FilesystemLayout fsLayout,
     fl.FlutterProject? project,
-    FlutterpiArtifacts? artifacts,
+    FlutterDrmEmbedderArtifacts? artifacts,
     String? mainPath,
     String manifestPath = fl.defaultManifestPath,
     String? applicationKernelFilePath,
@@ -34,7 +34,7 @@ class AppBuilder {
     Directory? outDir,
     bool unoptimized = false,
     bool includeDebugSymbols = false,
-    bool forceBundleFlutterpi = false,
+    bool forceBundleEmbedder = false,
   }) async {
     project ??= fl.FlutterProject.current();
     mainPath ??= fl.defaultMainPath;
@@ -42,14 +42,14 @@ class AppBuilder {
     outDir ??= globals.fs.directory(
       globals.fs.path.join(
         fl.getBuildDirectory(),
-        'flutter-pi',
+        'flutter-drm',
         switch (fsLayout) {
-          FilesystemLayout.flutterPi => '$target',
+          FilesystemLayout.flutterDrm => '$target',
           FilesystemLayout.metaFlutter => 'meta-flutter-$target',
         },
       ),
     );
-    artifacts ??= globals.flutterpiArtifacts;
+    artifacts ??= globals.flutterDrmEmbedderArtifacts;
 
     // We can still build debug for non-generic platforms of course, the correct
     // (generic) target must be chosen in the caller in that case.
@@ -85,13 +85,13 @@ class AppBuilder {
 
         // The flutter_tool computes the `.dart_tool/` subdir name from the
         // build environment hash.
-        // Adding a flutterpi-target entry here forces different subdirs for
+        // Adding a flutter-drm-target entry here forces different subdirs for
         // different target platforms.
         //
         // If we don't have this, the flutter tool will happily reuse as much as
         // it can, and it determines it can reuse the `app.so` from (for example)
         // an arm build with an arm64 build, leading to errors.
-        'flutterpi-target': target.shortName,
+        'flutter-drm-target': target.shortName,
         'unoptimized': unoptimized.toString(),
         'debug-symbols': includeDebugSymbols.toString(),
       },
@@ -105,30 +105,30 @@ class AppBuilder {
     );
 
     final buildTarget = switch (buildInfo.mode) {
-      fl.BuildMode.debug => DebugBundleFlutterpiAssets(
+      fl.BuildMode.debug => DebugBundleFlutterDrmAssets(
           target: target,
           unoptimized: unoptimized,
           debugSymbols: includeDebugSymbols,
           layout: fsLayout,
-          forceBundleFlutterpi: forceBundleFlutterpi,
+          forceBundleEmbedder: forceBundleEmbedder,
         ),
-      fl.BuildMode.profile => ProfileBundleFlutterpiAssets(
+      fl.BuildMode.profile => ProfileBundleFlutterDrmAssets(
           target: target,
           debugSymbols: includeDebugSymbols,
           layout: fsLayout,
-          forceBundleFlutterpi: forceBundleFlutterpi,
+          forceBundleEmbedder: forceBundleEmbedder,
         ),
-      fl.BuildMode.release => ReleaseBundleFlutterpiAssets(
+      fl.BuildMode.release => ReleaseBundleFlutterDrmAssets(
           target: target,
           debugSymbols: includeDebugSymbols,
           layout: fsLayout,
-          forceBundleFlutterpi: forceBundleFlutterpi,
+          forceBundleEmbedder: forceBundleEmbedder,
         ),
       _ => fl.throwToolExit('Unsupported build mode: ${buildInfo.mode}'),
     };
 
     final status =
-        globals.logger.startProgress('Building Flutter-Pi bundle...');
+        globals.logger.startProgress('Building Flutter DRM bundle...');
 
     try {
       final result = await _buildSystem.build(buildTarget, environment);
@@ -161,30 +161,30 @@ class AppBuilder {
     return;
   }
 
-  Future<FlutterpiAppBundle> buildBundle({
+  Future<FlutterDrmBundlerAppBundle> buildBundle({
     required String id,
-    required FlutterpiHostPlatform host,
-    required FlutterpiTargetPlatform target,
+    required FlutterDrmHostPlatform host,
+    required FlutterDrmTargetPlatform target,
     required fl.BuildInfo buildInfo,
     required FilesystemLayout fsLayout,
     fl.FlutterProject? project,
-    FlutterpiArtifacts? artifacts,
+    FlutterDrmEmbedderArtifacts? artifacts,
     String? mainPath,
     String manifestPath = fl.defaultManifestPath,
     String? applicationKernelFilePath,
     String? depfilePath,
     bool unoptimized = false,
     bool includeDebugSymbols = false,
-    bool forceBundleFlutterpi = false,
+    bool forceBundleEmbedder = false,
   }) async {
     final buildDir = fl.getBuildDirectory();
 
     final outPath = globals.fs.directory(
       globals.fs.path.join(
         buildDir,
-        'flutter-pi',
+        'flutter-drm',
         switch (fsLayout) {
-          FilesystemLayout.flutterPi => '$target',
+          FilesystemLayout.flutterDrm => '$target',
           FilesystemLayout.metaFlutter => 'meta-flutter-$target',
         },
       ),
@@ -204,16 +204,16 @@ class AppBuilder {
       outDir: outDir,
       unoptimized: unoptimized,
       includeDebugSymbols: includeDebugSymbols,
-      forceBundleFlutterpi: forceBundleFlutterpi,
+      forceBundleEmbedder: forceBundleEmbedder,
     );
 
-    final metaFlutterFlutterpiBin =
-        outDir.childDirectory('bin').childFile('flutter-pi');
+    final metaFlutterEmbedderBin =
+        outDir.childDirectory('bin').childFile('flutter-drm-embedder');
     final metaFlutterDbgsyms =
         outDir.childDirectory('lib').childFile('libflutter_engine.dbgsyms');
     final pluginListFile = outDir.childFile('flutter_plugins.json');
 
-    return PrebuiltFlutterpiAppBundle(
+    return PrebuiltFlutterDrmBundlerAppBundle(
       id: id,
       name: id,
       displayName: id,
@@ -222,21 +222,21 @@ class AppBuilder {
 
       // FIXME: This should be populated by the build targets instead.
       binaries: switch (fsLayout) {
-        FilesystemLayout.flutterPi => [
-            outDir.childFile('flutter-pi'),
+        FilesystemLayout.flutterDrm => [
+            outDir.childFile('flutter-drm-embedder'),
             outDir.childFile('libflutter_engine.so'),
             if (includeDebugSymbols)
               outDir.childFile('libflutter_engine.dbgsyms'),
           ],
         FilesystemLayout.metaFlutter => [
-            if (forceBundleFlutterpi) metaFlutterFlutterpiBin,
+            if (forceBundleEmbedder) metaFlutterEmbedderBin,
             outDir.childDirectory('lib').childFile('libflutter_engine.so'),
             if (includeDebugSymbols) metaFlutterDbgsyms,
           ],
       },
 
-      includesFlutterpiBinary:
-          fsLayout == FilesystemLayout.flutterPi || forceBundleFlutterpi,
+      includesEmbedderBinary:
+          fsLayout == FilesystemLayout.flutterDrm || forceBundleEmbedder,
     );
   }
 }

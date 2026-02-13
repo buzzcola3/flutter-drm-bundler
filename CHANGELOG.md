@@ -9,8 +9,8 @@
 - support flutter 3.38
 
 ## 0.9.2 - 2025-09-04
-- fix device diagnostics connecting to invalid device on `flutterpi_tool devices add`
-- fix target device specification using `flutterpi_tool run -d`
+- fix device diagnostics connecting to invalid device on `flutter_drm_bundler devices add`
+- fix target device specification using `flutter_drm_bundler run -d`
 
 ## 0.9.1 - 2025-09-01
 - fix artifacts resolving
@@ -21,27 +21,27 @@
 
 ## 0.8.1 - 2025-08-29
 - add `--fs-layout=<flutter-pi/meta-flutter>` argument to
-  `flutterpi_tool devices add` and `flutterpi_tool build`
+  `flutter_drm_bundler devices add` and `flutter_drm_bundler build`
 - internal refactors, tests & improvements
 
 ## 0.8.0 - 2025-06-13
-- add `--flutterpi-binary` argument to bundle a custom flutter-pi binary
+- add `--embedder-binary` argument to bundle a custom flutter-drm-embedder binary
   with the app
 - flutter 3.32 compatibility
 - internal artifact resolving refactors
 
 ## 0.7.3 - 2025-04-29
-- add `flutterpi_tool test` subcommand
+- add `flutter_drm_bundler test` subcommand
 - supports running integration tests on registered devices, e.g.
-  - `flutterpi_tool test integration_test -d pi`
-- add `--dummy-display` and `--dummy-display-size` args for `flutterpi_tool devices add`
+  - `flutter_drm_bundler test integration_test -d pi`
+- add `--dummy-display` and `--dummy-display-size` args for `flutter_drm_bundler devices add`
   - allows simulating a display, useful if no real display is attached
 
 ## 0.7.2 - 2025-04-29
-- add `flutterpi_tool test` subcommand
+- add `flutter_drm_bundler test` subcommand
 - supports running integration tests on registered devices, e.g.
-  - `flutterpi_tool test integration_test -d pi`
-- add `--dummy-display` and `--dummy-display-size` args for `flutterpi_tool devices add`
+  - `flutter_drm_bundler test integration_test -d pi`
+- add `--dummy-display` and `--dummy-display-size` args for `flutter_drm_bundler devices add`
   - allows simulating a display, useful if no real display is attached
 
 ## 0.7.1 - 2025-03-21
@@ -56,7 +56,7 @@
 - 3.27 compatibility
 
 ## [0.5.4] - 2024-08-13
-- fix `flutterpi_tool run -d` command for flutter 3.24
+- fix `flutter_drm_bundler run -d` command for flutter 3.24
 
 ## [0.5.3] - 2024-08-13
 - Fix artifact finding when github API results are paginated
@@ -68,13 +68,13 @@
 ## [0.5.1] - 2024-08-08
 - Expand remote user permissions check to `render` group, since that's necessary as well to use the hardware GPU.
 - Added a workaround for an issue where the executable permission of certain files would be lost when copying them to the output directory, causing errors when trying to run the app on the target.
-- Reduced the amount of GitHub API traffic generated when checking for updates to flutter-pi, to avoid rate limiting.
-- Changed the severity of the `failed to check for flutter-pi updates` message to a warning to avoid confusion.
+- Reduced the amount of GitHub API traffic generated when checking for updates to flutter-drm-embedder, to avoid rate limiting.
+- Changed the severity of the `failed to check for flutter-drm-embedder updates` message to a warning to avoid confusion.
 
 ## [0.5.0] - 2024-06-26
 
 - add `run` and `devices` subcommands
-- add persistent flutterpi_tool config for devices
+- add persistent flutter_drm_bundler config for devices
 - update Readme
 - constrain to flutter 3.22.0
 
@@ -105,11 +105,11 @@
 
 ## 0.1.2
 
-- update `flutterpi_tool --help` in readme
+- update `flutter_drm_bundler --help` in readme
 
 ## 0.1.1
 
-- update `flutterpi_tool build help` in readme
+- update `flutter_drm_bundler build help` in readme
 
 ## 0.1.0
 
@@ -136,7 +136,7 @@
 
 ## 0.0.2
 
-- rename global executable `flutterpi-tool ==> flutterpi_tool`
+- rename global executable `flutterpi-tool ==> flutter_drm_bundler`
 
 ## 0.0.1
 

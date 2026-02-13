@@ -5,20 +5,20 @@ import 'package:github/github.dart';
 import 'package:http/testing.dart' as http;
 import 'package:test/test.dart';
 
-import 'package:flutterpi_tool/src/more_os_utils.dart';
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/common.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/common.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
 
 import 'fake_github.dart';
 import 'src/fake_process_manager.dart';
 
 const githubApiResponse = '''
 {
-  "url": "https://api.github.com/repos/ardera/flutter-pi/releases/159500529",
-  "assets_url": "https://api.github.com/repos/ardera/flutter-pi/releases/159500529/assets",
-  "upload_url": "https://uploads.github.com/repos/ardera/flutter-pi/releases/159500529/assets{?name,label}",
-  "html_url": "https://github.com/ardera/flutter-pi/releases/tag/release/1.0.0",
+  "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/159500529",
+  "assets_url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/159500529/assets",
+  "upload_url": "https://uploads.github.com/repos/buzzcola3/flutter-drm-embedder/releases/159500529/assets{?name,label}",
+  "html_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/tag/release/1.0.0",
   "id": 159500529,
   "author": {
     "login": "github-actions[bot]",
@@ -50,10 +50,10 @@ const githubApiResponse = '''
   "published_at": "2024-06-08T08:49:27Z",
   "assets": [
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629658",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629658",
       "id": 172629658,
       "node_id": "RA_kwDOC1j4Fc4KSh6a",
-      "name": "flutterpi-aarch64-linux-gnu-debug.tar.xz",
+      "name": "flutter-drm-embedder-aarch64-linux-gnu-debug.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -81,13 +81,13 @@ const githubApiResponse = '''
       "download_count": 114,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-aarch64-linux-gnu-debug.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-aarch64-linux-gnu-debug.tar.xz"
     },
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629656",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629656",
       "id": 172629656,
       "node_id": "RA_kwDOC1j4Fc4KSh6Y",
-      "name": "flutterpi-aarch64-linux-gnu-release.tar.xz",
+      "name": "flutter-drm-embedder-aarch64-linux-gnu-release.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -115,13 +115,13 @@ const githubApiResponse = '''
       "download_count": 114,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-aarch64-linux-gnu-release.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-aarch64-linux-gnu-release.tar.xz"
     },
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629659",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629659",
       "id": 172629659,
       "node_id": "RA_kwDOC1j4Fc4KSh6b",
-      "name": "flutterpi-arm-linux-gnueabihf-debug.tar.xz",
+      "name": "flutter-drm-embedder-arm-linux-gnueabihf-debug.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -149,13 +149,13 @@ const githubApiResponse = '''
       "download_count": 110,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-arm-linux-gnueabihf-debug.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-arm-linux-gnueabihf-debug.tar.xz"
     },
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629655",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629655",
       "id": 172629655,
       "node_id": "RA_kwDOC1j4Fc4KSh6X",
-      "name": "flutterpi-arm-linux-gnueabihf-release.tar.xz",
+      "name": "flutter-drm-embedder-arm-linux-gnueabihf-release.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -183,13 +183,13 @@ const githubApiResponse = '''
       "download_count": 118,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-arm-linux-gnueabihf-release.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-arm-linux-gnueabihf-release.tar.xz"
     },
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629657",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629657",
       "id": 172629657,
       "node_id": "RA_kwDOC1j4Fc4KSh6Z",
-      "name": "flutterpi-x86_64-linux-gnu-debug.tar.xz",
+      "name": "flutter-drm-embedder-x86_64-linux-gnu-debug.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -217,13 +217,13 @@ const githubApiResponse = '''
       "download_count": 109,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-x86_64-linux-gnu-debug.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-x86_64-linux-gnu-debug.tar.xz"
     },
     {
-      "url": "https://api.github.com/repos/ardera/flutter-pi/releases/assets/172629660",
+      "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/assets/172629660",
       "id": 172629660,
       "node_id": "RA_kwDOC1j4Fc4KSh6c",
-      "name": "flutterpi-x86_64-linux-gnu-release.tar.xz",
+      "name": "flutter-drm-embedder-x86_64-linux-gnu-release.tar.xz",
       "label": "",
       "uploader": {
         "login": "github-actions[bot]",
@@ -251,14 +251,14 @@ const githubApiResponse = '''
       "download_count": 108,
       "created_at": "2024-06-08T08:49:27Z",
       "updated_at": "2024-06-08T08:49:27Z",
-      "browser_download_url": "https://github.com/ardera/flutter-pi/releases/download/release/1.0.0/flutterpi-x86_64-linux-gnu-release.tar.xz"
+      "browser_download_url": "https://github.com/buzzcola3/flutter-drm-embedder/releases/download/release/1.0.0/flutter-drm-embedder-x86_64-linux-gnu-release.tar.xz"
     }
   ],
-  "tarball_url": "https://api.github.com/repos/ardera/flutter-pi/tarball/release/1.0.0",
-  "zipball_url": "https://api.github.com/repos/ardera/flutter-pi/zipball/release/1.0.0",
+  "tarball_url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/tarball/release/1.0.0",
+  "zipball_url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/zipball/release/1.0.0",
   "body": "Initial Github release with prebuilt artifacts.",
   "reactions": {
-    "url": "https://api.github.com/repos/ardera/flutter-pi/releases/159500529/reactions",
+    "url": "https://api.github.com/repos/buzzcola3/flutter-drm-embedder/releases/159500529/reactions",
     "total_count": 6,
     "+1": 0,
     "-1": 0,
@@ -272,8 +272,8 @@ const githubApiResponse = '''
 }''';
 
 Future<Set<String>> getArtifactKeysFor({
-  FlutterpiHostPlatform? host,
-  Set<FlutterpiTargetPlatform> targets = const {},
+  FlutterDrmHostPlatform? host,
+  Set<FlutterDrmTargetPlatform> targets = const {},
   Set<EngineFlavor> flavors = const {},
   Set<BuildMode> runtimeModes = const {},
   bool includeDebugSymbols = false,
@@ -283,7 +283,7 @@ Future<Set<String>> getArtifactKeysFor({
   final platform = FakePlatform();
   final hooks = ShutdownHooks();
 
-  final cache = FlutterpiCache(
+  final cache = FlutterDrmBundlerCache(
     logger: logger,
     fileSystem: fs,
     platform: platform,
@@ -335,13 +335,13 @@ void main() {
   test('all engine artifacts', () async {
     final artifacts = await getArtifactKeysFor(
       targets: {
-        FlutterpiTargetPlatform.genericAArch64,
-        FlutterpiTargetPlatform.genericArmV7,
-        FlutterpiTargetPlatform.genericX64,
-        FlutterpiTargetPlatform.pi3,
-        FlutterpiTargetPlatform.pi3_64,
-        FlutterpiTargetPlatform.pi4,
-        FlutterpiTargetPlatform.pi4_64,
+        FlutterDrmTargetPlatform.genericAArch64,
+        FlutterDrmTargetPlatform.genericArmV7,
+        FlutterDrmTargetPlatform.genericX64,
+        FlutterDrmTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.pi3_64,
+        FlutterDrmTargetPlatform.pi4,
+        FlutterDrmTargetPlatform.pi4_64,
       },
       flavors: {
         EngineFlavor.debugUnopt,
@@ -382,15 +382,15 @@ void main() {
 
   test('all linux-x64 gen_snapshots', () async {
     final artifacts = await getArtifactKeysFor(
-      host: FlutterpiHostPlatform.linuxX64,
+      host: FlutterDrmHostPlatform.linuxX64,
       targets: {
-        FlutterpiTargetPlatform.genericAArch64,
-        FlutterpiTargetPlatform.genericArmV7,
-        FlutterpiTargetPlatform.genericX64,
-        FlutterpiTargetPlatform.pi3,
-        FlutterpiTargetPlatform.pi3_64,
-        FlutterpiTargetPlatform.pi4,
-        FlutterpiTargetPlatform.pi4_64,
+        FlutterDrmTargetPlatform.genericAArch64,
+        FlutterDrmTargetPlatform.genericArmV7,
+        FlutterDrmTargetPlatform.genericX64,
+        FlutterDrmTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.pi3_64,
+        FlutterDrmTargetPlatform.pi4,
+        FlutterDrmTargetPlatform.pi4_64,
       },
       runtimeModes: {BuildMode.debug, BuildMode.profile, BuildMode.release},
     );
@@ -411,15 +411,15 @@ void main() {
 
   test('all macos x64 gen_snapshots', () async {
     final artifacts = await getArtifactKeysFor(
-      host: FlutterpiHostPlatform.darwinX64,
+      host: FlutterDrmHostPlatform.darwinX64,
       targets: {
-        FlutterpiTargetPlatform.genericAArch64,
-        FlutterpiTargetPlatform.genericArmV7,
-        FlutterpiTargetPlatform.genericX64,
-        FlutterpiTargetPlatform.pi3,
-        FlutterpiTargetPlatform.pi3_64,
-        FlutterpiTargetPlatform.pi4,
-        FlutterpiTargetPlatform.pi4_64,
+        FlutterDrmTargetPlatform.genericAArch64,
+        FlutterDrmTargetPlatform.genericArmV7,
+        FlutterDrmTargetPlatform.genericX64,
+        FlutterDrmTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.pi3_64,
+        FlutterDrmTargetPlatform.pi4,
+        FlutterDrmTargetPlatform.pi4_64,
       },
       flavors: {},
       runtimeModes: {BuildMode.debug, BuildMode.profile, BuildMode.release},
@@ -441,10 +441,10 @@ void main() {
 
   test('specific artifact selection', () async {
     final artifacts = await getArtifactKeysFor(
-      host: FlutterpiHostPlatform.linuxX64,
+      host: FlutterDrmHostPlatform.linuxX64,
       targets: {
-        FlutterpiTargetPlatform.genericArmV7,
-        FlutterpiTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.genericArmV7,
+        FlutterDrmTargetPlatform.pi3,
       },
       flavors: {EngineFlavor.debugUnopt, EngineFlavor.release},
       runtimeModes: {BuildMode.debug, BuildMode.release},
@@ -464,11 +464,11 @@ void main() {
 
   test('specific artifact selection', () async {
     final artifacts = await getArtifactKeysFor(
-      host: FlutterpiHostPlatform.linuxX64,
+      host: FlutterDrmHostPlatform.linuxX64,
       targets: {
-        FlutterpiTargetPlatform.genericArmV7,
-        FlutterpiTargetPlatform.pi3,
-        FlutterpiTargetPlatform.pi4_64,
+        FlutterDrmTargetPlatform.genericArmV7,
+        FlutterDrmTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.pi4_64,
       },
       flavors: {EngineFlavor.debugUnopt, EngineFlavor.release},
       runtimeModes: {BuildMode.debug, BuildMode.release},
@@ -489,11 +489,11 @@ void main() {
 
   test('specific artifact selection', () async {
     final artifacts = await getArtifactKeysFor(
-      host: FlutterpiHostPlatform.linuxX64,
+      host: FlutterDrmHostPlatform.linuxX64,
       targets: {
-        FlutterpiTargetPlatform.genericX64,
-        FlutterpiTargetPlatform.pi3,
-        FlutterpiTargetPlatform.pi4_64,
+        FlutterDrmTargetPlatform.genericX64,
+        FlutterDrmTargetPlatform.pi3,
+        FlutterDrmTargetPlatform.pi4_64,
       },
       flavors: {EngineFlavor.debugUnopt, EngineFlavor.release},
       runtimeModes: {BuildMode.debug, BuildMode.release},
@@ -514,7 +514,7 @@ void main() {
 
   // TODO: Engine artifacts update checking
 
-  group('flutter-pi update checking', () {
+  group('flutter-drm-embedder update checking', () {
     late BufferLogger logger;
     late MemoryFileSystem fs;
     late FakePlatform platform;
@@ -523,7 +523,7 @@ void main() {
     late bool gitWasCalled;
     late bool apiWasCalled;
     late http.MockClient httpClient;
-    late FlutterpiBinaries binaries;
+    late FlutterDrmEmbedderBinaries binaries;
     late Cache cache;
     late List<ArtifactSet> artifacts;
 
@@ -539,7 +539,7 @@ void main() {
       github = FakeGithub();
 
       github.getLatestReleaseFn = (repo) async {
-        expect(repo.fullName, 'ardera/flutter-pi');
+        expect(repo.fullName, 'buzzcola3/flutter-drm-embedder');
         apiWasCalled = true;
         return Release(tagName: 'release/1.0.0');
       };
@@ -562,7 +562,7 @@ void main() {
             'ls-remote',
             '--tags',
             '--sort=-v:refname:lstrip=3',
-            'https://github.com/ardera/flutter-pi.git',
+            'https://github.com/buzzcola3/flutter-drm-embedder.git',
             'refs/tags/release/*',
           ],
           onRun: () => gitWasCalled = true,
@@ -589,7 +589,7 @@ void main() {
         rootOverride: fs.directory("cache"),
       );
 
-      binaries = FlutterpiBinaries(
+      binaries = FlutterDrmEmbedderBinaries(
         cache: cache,
         fs: fs,
         httpClient: httpClient,

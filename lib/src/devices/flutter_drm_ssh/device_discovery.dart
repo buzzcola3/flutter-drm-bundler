@@ -1,11 +1,11 @@
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/device.dart';
-import 'package:flutterpi_tool/src/fltool/common.dart';
-import 'package:flutterpi_tool/src/config.dart';
-import 'package:flutterpi_tool/src/more_os_utils.dart';
-import 'package:flutterpi_tool/src/devices/flutterpi_ssh/ssh_utils.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/device.dart';
+import 'package:flutter_drm_bundler/src/fltool/common.dart';
+import 'package:flutter_drm_bundler/src/config.dart';
+import 'package:flutter_drm_bundler/src/more_os_utils.dart';
+import 'package:flutter_drm_bundler/src/devices/flutter_drm_ssh/ssh_utils.dart';
 
-class FlutterpiSshDeviceDiscovery extends PollingDeviceDiscovery {
-  FlutterpiSshDeviceDiscovery({
+class FlutterDrmBundlerSshDeviceDiscovery extends PollingDeviceDiscovery {
+  FlutterDrmBundlerSshDeviceDiscovery({
     required this.sshUtils,
     required this.config,
     required this.logger,
@@ -13,7 +13,7 @@ class FlutterpiSshDeviceDiscovery extends PollingDeviceDiscovery {
   }) : super('SSH Devices');
 
   final SshUtils sshUtils;
-  final FlutterPiToolConfig config;
+  final FlutterDrmBundlerConfig config;
   final Logger logger;
   final MoreOperatingSystemUtils os;
 
@@ -35,14 +35,14 @@ class FlutterpiSshDeviceDiscovery extends PollingDeviceDiscovery {
       return null;
     }
 
-    return FlutterpiSshDevice(
+    return FlutterDrmBundlerSshDevice(
       id: configEntry.id,
       name: configEntry.id,
       sshUtils: sshUtils,
       remoteInstallPath: configEntry.remoteInstallPath,
       logger: logger,
       os: os,
-      args: FlutterpiArgs(
+      args: FlutterDrmBundlerArgs(
         explicitDisplaySizeMillimeters: configEntry.displaySizeMillimeters,
         useDummyDisplay: configEntry.useDummyDisplay,
         dummyDisplaySize: configEntry.dummyDisplaySize,

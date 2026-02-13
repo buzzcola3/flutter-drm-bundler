@@ -2,26 +2,26 @@
 
 import 'dart:async';
 import 'package:args/command_runner.dart';
-import 'package:flutterpi_tool/src/context.dart';
-import 'package:flutterpi_tool/src/shutdown_hooks.dart';
+import 'package:flutter_drm_bundler/src/context.dart';
+import 'package:flutter_drm_bundler/src/shutdown_hooks.dart';
 import 'package:meta/meta.dart';
 
-import 'package:flutterpi_tool/src/cache.dart';
-import 'package:flutterpi_tool/src/cli/commands/build.dart';
-import 'package:flutterpi_tool/src/cli/command_runner.dart';
-import 'package:flutterpi_tool/src/cli/commands/devices.dart';
-import 'package:flutterpi_tool/src/cli/commands/precache.dart';
-import 'package:flutterpi_tool/src/cli/commands/run.dart';
-import 'package:flutterpi_tool/src/cli/commands/test.dart';
+import 'package:flutter_drm_bundler/src/cache.dart';
+import 'package:flutter_drm_bundler/src/cli/commands/build.dart';
+import 'package:flutter_drm_bundler/src/cli/command_runner.dart';
+import 'package:flutter_drm_bundler/src/cli/commands/devices.dart';
+import 'package:flutter_drm_bundler/src/cli/commands/precache.dart';
+import 'package:flutter_drm_bundler/src/cli/commands/run.dart';
+import 'package:flutter_drm_bundler/src/cli/commands/test.dart';
 
-import 'package:flutterpi_tool/src/fltool/common.dart' as fltool;
-import 'package:flutterpi_tool/src/fltool/globals.dart' as globals;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fltool;
+import 'package:flutter_drm_bundler/src/fltool/globals.dart' as globals;
 
 @visibleForTesting
-FlutterpiToolCommandRunner createFlutterpiCommandRunner({
+FlutterDrmBundlerCommandRunner createFlutterDrmBundlerCommandRunner({
   bool verboseHelp = false,
 }) {
-  final runner = FlutterpiToolCommandRunner(verboseHelp: verboseHelp);
+  final runner = FlutterDrmBundlerCommandRunner(verboseHelp: verboseHelp);
 
   runner.addCommand(BuildCommand(verboseHelp: verboseHelp));
   runner.addCommand(PrecacheCommand());
@@ -50,7 +50,7 @@ Future<void> main(List<String> args) async {
       (args.length == 1 && verbose);
   final verboseHelp = help && verbose;
 
-  final runner = createFlutterpiCommandRunner(verboseHelp: verboseHelp);
+  final runner = createFlutterDrmBundlerCommandRunner(verboseHelp: verboseHelp);
 
   fltool.Cache.flutterRoot = await getFlutterRoot();
 

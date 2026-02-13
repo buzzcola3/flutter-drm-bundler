@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:test/test.dart';
 
-import 'package:flutterpi_tool/src/fltool/common.dart' as fl;
+import 'package:flutter_drm_bundler/src/fltool/common.dart' as fl;
 
 class MockBuildSystem implements fl.BuildSystem {
   Future<fl.BuildResult> Function(
