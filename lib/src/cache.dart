@@ -285,6 +285,8 @@ class FlutterDrmEmbedderBinaries extends ArtifactSet {
           ),
     ];
 
+    final releaseTag = release.tagName ?? 'unknown';
+
     for (final (assetName, subdirs) in [...artifacts, ...shimArtifacts]) {
       final asset = release.findAsset(assetName);
 
@@ -303,7 +305,7 @@ class FlutterDrmEmbedderBinaries extends ArtifactSet {
           .directory(path.joinAll([this.location.path, ...subdirs]));
 
       await artifactUpdater.downloadArchive(
-        'Downloading $assetName...',
+        'Downloading $assetName (release $releaseTag)...',
         url,
         location,
         archiveType: ArchiveType.tarXz,
